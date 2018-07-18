@@ -71,3 +71,6 @@ posix-configs/SITL/init/test/*_generated
 /modules
 
 *.gcov
+
+*.sublime-project
+*.sublime-workspace
