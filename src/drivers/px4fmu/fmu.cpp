@@ -1273,10 +1273,7 @@ PX4FMU::cycle()
 				}
 			}
 		} // poll_fds
-		if (_mixers == nullptr) // to debug
-		{
-			PX4_INFO("the pointer of _mixers is null");
-		}
+
 		/* run the mixers on every cycle */
 		{
 			if (_mixers != nullptr) {
@@ -3073,6 +3070,15 @@ PX4FMU::test()
 
 	PX4_INFO("Testing %u servos and %u input captures", (unsigned)servo_count, capture_count);
 	memset(capture_conf, 0, sizeof(capture_conf));
+
+	if (_mixers == nullptr) // TO DEBUG
+	{
+		PX4_INFO("the pointer of _mixers is null");
+	}
+	else
+	{
+		PX4_INFO("the pointer of _mixers is not null");
+	}
 
 	if (capture_count != 0) {
 		for (unsigned i = 0; i < capture_count; i++) {
