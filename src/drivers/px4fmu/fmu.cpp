@@ -1277,6 +1277,10 @@ PX4FMU::cycle()
 		{
 			PX4_INFO("the pointer of _mixers is null");
 		}
+		else
+		{
+			PX4_INFO("the pointer of _mixers is not null");
+		}
 		/* run the mixers on every cycle */
 		{
 			if (_mixers != nullptr) {
