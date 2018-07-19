@@ -334,6 +334,8 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	// this will force the caller of the mixer to always supply new slew rate values, otherwise no slew rate limiting will happen
 	_delta_out_max = 0.0f;
 
+	PX4_INFO("mixer_multirotor and rotor count = %d", _rotor_count);
+
 	return _rotor_count;
 }
 
