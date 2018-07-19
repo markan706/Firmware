@@ -344,7 +344,7 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	_delta_out_max = 0.0f;
 
 	/////////TO DEBUG
-	mavlink_log_info(&mavlink_log_pub, "mixer_multirotor and rotor count = %d", _rotor_count);
+	mavlink_log_info(&mavlink_log_pub, "Using mixer_multirotor and _rotor_count = %d", _rotor_count);
 	/////////TO DEBUG
 	return _rotor_count;
 }

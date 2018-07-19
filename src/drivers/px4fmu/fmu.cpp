@@ -1350,6 +1350,9 @@ PX4FMU::cycle()
 				if (_pwm_initialized) {
 					for (size_t i = 0; i < mixed_num_outputs; i++) {
 						up_pwm_servo_set(i, pwm_limited[i]);
+						/////////TO DEBUG
+						mavlink_log_info(&mavlink_log_pub, "PWM_limited[%d] = %d", i, pwm_limited[i]);
+						/////////TO DEBUG
 					}
 				}
 
