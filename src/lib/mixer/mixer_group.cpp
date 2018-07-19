@@ -53,10 +53,20 @@
 
 #include "mixer.h"
 
+
+/////////TO DEBUG
+#include <systemlib/mavlink_log.h>
+#include <uORB/topics/mavlink_log.h>
+/////////TO DEBUG
+
 #define debug(fmt, args...)	do { } while(0)
 //#define debug(fmt, args...)	do { printf("[mixer] " fmt "\n", ##args); } while(0)
 //#include <debug.h>
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
+
+/////////TO DEBUG
+static orb_advert_t mavlink_log_pub = nullptr;
+/////////TO DEBUG
 
 MixerGroup::MixerGroup(ControlCallback control_cb, uintptr_t cb_handle) :
 	Mixer(control_cb, cb_handle),
@@ -112,7 +122,9 @@ MixerGroup::mix(float *outputs, unsigned space)
 		index += mixer->mix(outputs + index, space - index);
 		mixer = mixer->_next;
 	}
-
+	/////////TO DEBUG
+	mavlink_log_info(&mavlink_log_pub, "Using mixer_Group and index = %d", index);
+	/////////TO DEBUG
 	return index;
 }
 
@@ -172,6 +184,7 @@ MixerGroup::get_trims(int16_t *values)
 
 		mixer = mixer->_next;
 	}
+
 
 	return index;
 }

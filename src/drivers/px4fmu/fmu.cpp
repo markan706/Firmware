@@ -1326,6 +1326,10 @@ PX4FMU::cycle()
 				float outputs[_max_actuators];
 				const unsigned mixed_num_outputs = _mixers->mix(outputs, _num_outputs);
 
+				/////////TO DEBUG
+				mavlink_log_info(&mavlink_log_pub, "mixed_num_outputs = %d, _num_outputs = %d ", mixed_num_outputs, _num_outputs);
+				/////////TO DEBUG
+
 				/* the PWM limit call takes care of out of band errors, NaN and constrains */
 				uint16_t pwm_limited[MAX_ACTUATORS];
 
@@ -1353,10 +1357,6 @@ PX4FMU::cycle()
 					}
 				}
 
-				/////////TO DEBUG
-				mavlink_log_info(&mavlink_log_pub, "mixed_num_outputs = %d", mixed_num_outputs);
-				/////////TO DEBUG
-				
 				/* Trigger all timer's channels in Oneshot mode to fire
 				 * the oneshots with updated values.
 				 */
