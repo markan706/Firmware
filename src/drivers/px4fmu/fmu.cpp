@@ -1273,7 +1273,10 @@ PX4FMU::cycle()
 				}
 			}
 		} // poll_fds
-
+		if (_mixers == nullptr) // to debug
+		{
+			PX4_INFO("the pointer of _mixers is null");
+		}
 		/* run the mixers on every cycle */
 		{
 			if (_mixers != nullptr) {
