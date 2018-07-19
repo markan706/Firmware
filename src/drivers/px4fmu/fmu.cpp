@@ -1286,14 +1286,14 @@ PX4FMU::cycle()
 		} // poll_fds
 
 		/////////TO DEBUG
-		if (_mixers == nullptr) 
-		{
-			mavlink_log_info(&mavlink_log_pub, " the pointer of _mixers is not null");
-		}
-		else
-		{
-			mavlink_log_info(&mavlink_log_pub, " the pointer of _mixers is not null");
-		}
+		// if (_mixers == nullptr) 
+		// {
+		// 	mavlink_log_info(&mavlink_log_pub, " the pointer of _mixers is not null");
+		// }
+		// else
+		// {
+		// 	mavlink_log_info(&mavlink_log_pub, " the pointer of _mixers is not null");
+		// }
 		/////////TO DEBUG
 
 		/* run the mixers on every cycle */
@@ -1350,12 +1350,13 @@ PX4FMU::cycle()
 				if (_pwm_initialized) {
 					for (size_t i = 0; i < mixed_num_outputs; i++) {
 						up_pwm_servo_set(i, pwm_limited[i]);
-						/////////TO DEBUG
-						mavlink_log_info(&mavlink_log_pub, "PWM_limited[%d] = %d", i, pwm_limited[i]);
-						/////////TO DEBUG
 					}
 				}
 
+				/////////TO DEBUG
+				mavlink_log_info(&mavlink_log_pub, "mixed_num_outputs = %d", mixed_num_outputs);
+				/////////TO DEBUG
+				
 				/* Trigger all timer's channels in Oneshot mode to fire
 				 * the oneshots with updated values.
 				 */
