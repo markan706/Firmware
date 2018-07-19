@@ -72,6 +72,11 @@
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_status.h>
 
+/////////TO DEBUG
+#include <systemlib/mavlink_log.h>
+#include <uORB/topics/mavlink_log.h>
+/////////TO DEBUG
+
 #ifdef HRT_PPM_CHANNEL
 # include <systemlib/ppm_decode.h>
 #endif
@@ -101,6 +106,12 @@ static constexpr uint8_t MAX_ACTUATORS = DIRECT_PWM_OUTPUT_CHANNELS;
 #define LED_PATTERN_IO_ARMED 			0x5050		/**< long off, then double blink 	*/
 #define LED_PATTERN_FMU_ARMED 			0x5500		/**< long off, then quad blink 		*/
 #define LED_PATTERN_IO_FMU_ARMED 		0xffff		/**< constantly on			*/
+
+
+/////////TO DEBUG
+static orb_advert_t mavlink_log_pub = nullptr;
+/////////TO DEBUG
+
 
 /** Mode given via CLI */
 enum PortMode {
@@ -1273,6 +1284,17 @@ PX4FMU::cycle()
 				}
 			}
 		} // poll_fds
+
+		/////////TO DEBUG
+		if (_mixers == nullptr) 
+		{
+			mavlink_log_info(&mavlink_log_pub, " the pointer of _mixers is not null");
+		}
+		else
+		{
+			mavlink_log_info(&mavlink_log_pub, " the pointer of _mixers is not null");
+		}
+		/////////TO DEBUG
 
 		/* run the mixers on every cycle */
 		{
@@ -3070,15 +3092,6 @@ PX4FMU::test()
 
 	PX4_INFO("Testing %u servos and %u input captures", (unsigned)servo_count, capture_count);
 	memset(capture_conf, 0, sizeof(capture_conf));
-
-	if (_mixers == nullptr) // TO DEBUG
-	{
-		PX4_INFO("the pointer of _mixers is null");
-	}
-	else
-	{
-		PX4_INFO("the pointer of _mixers is not null");
-	}
 
 	if (capture_count != 0) {
 		for (unsigned i = 0; i < capture_count; i++) {
