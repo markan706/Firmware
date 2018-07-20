@@ -1327,7 +1327,7 @@ PX4FMU::cycle()
 				const unsigned mixed_num_outputs = _mixers->mix(outputs, _num_outputs);
 
 				/////////TO DEBUG
-				mavlink_log_info(&mavlink_log_pub, "mixed_num_outputs = %d, _num_outputs = %d ", mixed_num_outputs, _num_outputs);
+				// mavlink_log_info(&mavlink_log_pub, "mixed_num_outputs = %d, _num_outputs = %d ", mixed_num_outputs, _num_outputs);
 				/////////TO DEBUG
 
 				/* the PWM limit call takes care of out of band errors, NaN and constrains */
