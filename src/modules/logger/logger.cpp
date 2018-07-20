@@ -375,6 +375,10 @@ Logger *Logger::instantiate(int argc, char *argv[])
 		return nullptr;
 	}
 
+	/////////TO DEBUG
+	log_name_timestamp = true;
+	/////////TO DEBUG
+
 	Logger *logger = new Logger(backend, log_buffer_size, log_interval, poll_topic, log_on_start,
 				    log_until_shutdown, log_name_timestamp, queue_size);
 

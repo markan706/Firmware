@@ -245,7 +245,7 @@ then
 	#
 	if param compare SYS_USE_IO 1
 	then
-		set USE_IO yes
+		set USE_IO no
 	fi
 
 	if param compare SYS_FMU_TASK 1
