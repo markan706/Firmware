@@ -1383,10 +1383,11 @@ int Logger::get_log_file_name(char *file_name, size_t file_name_size)
 	if (_log_name_timestamp) {
 		/* use RTC time for log file naming, e.g. /fs/microsd/2014-01-19/19_37_52.ulg */
 		time_ok = get_log_time(&tt, false);
-		/////////TO DEBUG
-		mavlink_log_info(&mavlink_log_pub, " time_ok = %u", time_ok);
-		/////////TO DEBUG
 	}
+
+	/////////TO DEBUG
+	mavlink_log_info(&mavlink_log_pub, " time_ok = %u", time_ok);
+	/////////TO DEBUG
 
 	const char *replay_suffix = "";
 
