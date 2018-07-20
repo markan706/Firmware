@@ -109,7 +109,7 @@ static constexpr uint8_t MAX_ACTUATORS = DIRECT_PWM_OUTPUT_CHANNELS;
 
 
 /////////TO DEBUG
-static orb_advert_t mavlink_log_pub = nullptr;
+// static orb_advert_t mavlink_log_pub = nullptr;
 /////////TO DEBUG
 
 
