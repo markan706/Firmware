@@ -227,6 +227,7 @@ private:
     uint32_t _GPIOx_BSRR_addr;
     uint32_t _ADC_Channel; 
     uint32_t _ADC_SMPR_config;
+
     static bool timer_init;
     // static const GPIOConfig _gpio_tab;
     /**
@@ -305,12 +306,6 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
                 uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
                 uint32_t adc_SQR, uint32_t adc_SMPR_config):
     CDev("MA40H1S", devpath),
-    _dr_a_port(gpio_dr_a),
-    _dr_b_port(gpio_dr_b),
-    _ultrasonic_id(id),
-    _GPIOx_BSRR_addr(gpio_BSRR_addr),
-    _ADC_Channel(adc_SQR), 
-    _ADC_SMPR_config(adc_SMPR_config),
     _min_distance(0.28f),
     _max_distance(5.0f),
     _class_instance(-1),
@@ -324,7 +319,13 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
     _end_index(0),
     _last_inte(0),
     _tx1_dma(nullptr),
-    _adc_dma(nullptr)
+    _adc_dma(nullptr),
+    _dr_a_port(gpio_dr_a),
+    _dr_b_port(gpio_dr_b),
+    _ultrasonic_id(id),
+    _GPIOx_BSRR_addr(gpio_BSRR_addr),
+    _ADC_Channel(adc_SQR), 
+    _ADC_SMPR_config(adc_SMPR_config)
 {
 	_armed.armed = false;
 	_vehicle_land_detected.landed = true;
