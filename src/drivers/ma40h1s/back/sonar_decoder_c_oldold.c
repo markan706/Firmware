@@ -2,36 +2,39 @@
  * File: sonar_decoder_c.c
  *
  * MATLAB Coder version            : 3.4
- * C/C++ source code generated on  : 06-Jul-2018 09:15:54
+ * C/C++ source code generated on  : 05-Jul-2018 14:37:07
  */
 
 /* Include Files */
 #include "sonar_decoder_c.h"
 
-/* Func tion Definitions */
+/* Function Definitions */
 
 /*
  * dt_1 - 计算一阶导数的低通时间常数，默认0.02
- *  lim_1 - 丢弃头部数据的一阶导数阈值，默认1500
- *  lim_2 - 丢弃头部数据的二阶导数阈值，默认0.025
+ *  lim_1 - 丢弃头部数据的一阶导数阈值，默认50
+ *  lim_2 - 丢弃头部数据的二阶导数阈值，默认1
  * Arguments    : short wave[10000]
  *                unsigned short N
+ *                float dt_1
+ *                short lim_1
+ *                float lim_2
  * Return Type  : unsigned short
  */
-unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
+unsigned short sonar_decoder_c(short wave[10000], unsigned short N, float dt_1,
+  short lim_1, float lim_2)
 {
   unsigned short location;
   int sum;
   unsigned short i;
-  short temp3;
-  short x;
-  float b_y1;
+  float temp;
   float y2;
   unsigned short ix;
   boolean_T flag;
   float temp2;
   int i0;
   int n;
+  short mtmp;
   int itmp;
 
   /*  signal = detrend(signal); */
@@ -44,14 +47,9 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
     sum += wave[i - 1];
   }
 
-  temp3 = (short)roundf((float)sum / 1000.0F);
+  temp = (float)sum / 1000.0F;
   for (i = 1; i <= N; i++) {
-    x = (short)(wave[i - 1] - temp3);
-    if (x < 0) {
-      wave[i - 1] = (short)-x;
-    } else {
-      wave[i - 1] = x;
-    }
+    wave[i - 1] = (short)roundf(fabsf((float)wave[i - 1] - temp));
   }
 
   /*  %加入低通滤波，int1为滤波后的信号，int2为1阶导数 */
@@ -77,21 +75,21 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
   /*  location = location + ix; */
   /*  end */
   /* 加入低通滤波，int1为滤波后的信号，int2为1阶导数 */
-  b_y1 = 0.0F;
+  temp = 0.0F;
   y2 = 0.0F;
-  ix = 900;
+  ix = 1100;
   flag = true;
   temp2 = 0.0F;
   for (i = 1; i <= N; i++) {
-    b_y1 += ((float)wave[i - 1] - b_y1) * 0.02F;
-    wave[i - 1] = (short)roundf(b_y1);
-    if ((i > 10) && (i < 1000) && flag) {
-      temp2 = (b_y1 - y2) * 0.004F;
+    temp += ((float)wave[i - 1] - temp) * dt_1;
+    wave[i - 1] = (short)roundf(temp);
+    if ((i > 10) && (i < 1100) && flag) {
+      temp2 = ((float)wave[i - 1] - y2) * dt_1;
       y2 += temp2;
     }
 
-    if ((i > 500) && (i < 1000) && flag && (wave[i - 251] < 1500) && (fabsf
-         (temp2) < 0.04F)) {
+    if ((i > 500) && (i < 1100) && flag && (wave[i - 1] < (unsigned short)lim_1)
+        && (fabsf(temp2) < lim_2)) {
       ix = i;
       flag = false;
     }
@@ -108,51 +106,21 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
   }
 
   n = sum - i0;
-  temp3 = wave[i0 - 1];
+  mtmp = wave[i0 - 1];
   itmp = -1;
   if ((sum - i0 > 1) && (1 < sum - i0)) {
     for (sum = 0; sum + 2 <= n; sum++) {
-      if (wave[i0 + sum] > temp3) {
-        temp3 = wave[i0 + sum];
+      if (wave[i0 + sum] > mtmp) {
+        mtmp = wave[i0 + sum];
         itmp = sum;
       }
     }
   }
 
-  if (temp3 > 45) {
+  if (mtmp > 45) {
     location = (unsigned short)((itmp + ix) + 2);
   } else {
     location = 1;
-  }
-
-  if (((location < 1500) && (temp3 < 500)) || ((location < 1000) && (temp3 < 700)))
-  {
-    ix = (unsigned short)(ix + 1500);
-    if (ix > (unsigned short)(N - 10U)) {
-      i0 = 1;
-      sum = 1;
-    } else {
-      i0 = ix;
-      sum = (unsigned short)(N - 10U) + 1;
-    }
-
-    n = sum - i0;
-    temp3 = wave[i0 - 1];
-    itmp = -1;
-    if ((sum - i0 > 1) && (1 < sum - i0)) {
-      for (sum = 0; sum + 2 <= n; sum++) {
-        if (wave[i0 + sum] > temp3) {
-          temp3 = wave[i0 + sum];
-          itmp = sum;
-        }
-      }
-    }
-
-    if (temp3 > 45) {
-      location = (unsigned short)((itmp + ix) + 2);
-    } else {
-      location = 1;
-    }
   }
 
   return location;

@@ -2,13 +2,28 @@
  * File: sonar_decoder_c.c
  *
  * MATLAB Coder version            : 3.4
- * C/C++ source code generated on  : 06-Jul-2018 09:15:54
+ * C/C++ source code generated on  : 06-Jul-2018 16:24:17
  */
 
 /* Include Files */
 #include "sonar_decoder_c.h"
 
-/* Func tion Definitions */
+/* Variable Definitions */
+static unsigned short LOC_pre;
+
+/* Function Declarations */
+static void sonar_decoder_c_init(void);
+
+/* Function Definitions */
+
+/*
+ * Arguments    : void
+ * Return Type  : void
+ */
+static void sonar_decoder_c_init(void)
+{
+  LOC_pre = 1;
+}
 
 /*
  * dt_1 - 计算一阶导数的低通时间常数，默认0.02
@@ -125,7 +140,7 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
     location = 1;
   }
 
-  if (((location < 1500) && (temp3 < 500)) || ((location < 1000) && (temp3 < 700)))
+  if (((location < 1500) && (temp3 < 500)) || ((location < 1000) && (temp3 < 900)))
   {
     ix = (unsigned short)(ix + 1500);
     if (ix > (unsigned short)(N - 10U)) {
@@ -155,6 +170,13 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
     }
   }
 
+  if ((LOC_pre > 2900) && ((float)wave[(unsigned short)(LOC_pre - 600U) - 1] /
+       ((float)temp3 + 0.01F) > 0.78F) && (wave[(unsigned short)(LOC_pre - 600U)
+       - 1] > 36)) {
+    location = (unsigned short)(LOC_pre - 599U);
+  }
+
+  LOC_pre = location;
   return location;
 }
 
@@ -164,6 +186,7 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
  */
 void sonar_decoder_c_initialize(void)
 {
+  sonar_decoder_c_init();
 }
 
 /*

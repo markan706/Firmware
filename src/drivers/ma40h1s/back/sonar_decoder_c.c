@@ -2,13 +2,13 @@
  * File: sonar_decoder_c.c
  *
  * MATLAB Coder version            : 3.4
- * C/C++ source code generated on  : 06-Jul-2018 09:15:54
+ * C/C++ source code generated on  : 06-Jul-2018 09:06:52
  */
 
 /* Include Files */
 #include "sonar_decoder_c.h"
 
-/* Func tion Definitions */
+/* Function Definitions */
 
 /*
  * dt_1 - 计算一阶导数的低通时间常数，默认0.02

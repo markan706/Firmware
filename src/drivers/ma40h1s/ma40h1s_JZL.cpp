@@ -60,7 +60,8 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 
-#include <systemlib/perf_counter.h>
+//#include <systemlib/perf_counter.h>
+#include <perf/perf_counter.h>
 #include <systemlib/err.h>
 
 #include <drivers/device/device.h>
@@ -113,11 +114,22 @@
 #define rDR         REG(STM32_ADC_DR_OFFSET)
 
 
-#define MA40H1S_CONVERSION_INTERVAL 40000 //us
+#define MA40H1S_CONVERSION_INTERVAL 43500 //us
 
 #define MID_LENGTH  7
 
-#define ADC_BUFFER_SIZE 15000
+#define ADC_BUFFER_SIZE 10000
+
+enum MA40H1S_ID
+{
+    MA40H1S_ID_ALL          = 0,
+    MA40H1S_ID_EXPANSION    = 1,
+    MA40H1S_ID_EXPANSION1   = 2,
+    MA40H1S_ID_EXPANSION2   = 3,
+    MA40H1S_ID_EXPANSION3   = 4, 
+    MA40H1S_ID_PRIMARY      = 5,       
+};
+
 
 #ifdef ERROR
 # undef ERROR
@@ -131,7 +143,10 @@ static const int ERROR = -1;
 class MA40H1S : public device::CDev
 {
 public:
-    MA40H1S();
+    MA40H1S(enum MA40H1S_ID id, const char * devpath, 
+            uint32_t gpio_dr_a, uint32_t gpio_dr_b
+            uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
+            uint32_t adc_SQR, uint32_t adc_SMPR_config);
     virtual ~MA40H1S();
 
     virtual int init();
@@ -186,27 +201,32 @@ private:
     DMA_HANDLE      _tx1_dma;
     DMA_HANDLE      _adc_dma;
 
-    struct stm32_tim_dev_s * _tim8; 
-	struct stm32_tim_dev_s * _tim5; 
+    static struct stm32_tim_dev_s * _tim8; 
+	static struct stm32_tim_dev_s * _tim5; 
 
     static bool _time_up;
 
-    static uint32_t     dma_buffer[2];
-    static uint16_t     adc_buffer[ADC_BUFFER_SIZE];
-
-    // static float adc_buffer_f[ADC_BUFFER_SIZE];
+    uint32_t     _dma_buffer[2];
+    //static uint16_t     adc_buffer[ADC_BUFFER_SIZE];
+    uint16_t     adc_buffer[ADC_BUFFER_SIZE];
 
     uint16_t average_sample;
     uint16_t thr_value;
 
     bool single_test_mode;
 
-    struct GPIOConfig {
-        uint32_t        dr_a_port;
-        uint32_t        dr_b_port;
-    };
-
-    static const GPIOConfig _gpio_tab;
+    // struct GPIOConfig {
+    //     uint32_t        dr_a_port;
+    //     uint32_t        dr_b_port;
+    // };
+    uint32_t        _dr_a_port;
+    uint32_t        _dr_b_port;
+    enum MA40H1S_ID _ultrasonic_id;
+    uint32_t _GPIOx_BSRR_addr;
+    uint32_t _ADC_Channel; 
+    uint32_t _ADC_SMPR_config;
+    static bool timer_init;
+    // static const GPIOConfig _gpio_tab;
     /**
     * Initialise the automatic measurement state machine and start it.
     */
@@ -252,10 +272,10 @@ private:
     void        _do_adc_dma_callback(unsigned status);
 };
 
-const MA40H1S::GPIOConfig MA40H1S::_gpio_tab = {
-    GPIO_DR_A,
-    GPIO_DR_B
-};
+// const MA40H1S::GPIOConfig MA40H1S::_gpio_tab = {
+//     GPIO_DR_A,
+//     GPIO_DR_B
+// };
 
 hrt_abstime MA40H1S::_start_time = 0;
 bool MA40H1S::_echo_valid = false;
@@ -265,7 +285,6 @@ uint8_t MA40H1S::trig_state = 5;
 uint8_t MA40H1S::_echo_count = 0;
 // struct stm32_tim_dev_s MA40H1S::*_tim5 = NULL; 
 
-
  /*
  * Driver 'main' command.
  */
@@ -273,14 +292,25 @@ extern "C" __EXPORT int ma40h1s_main(int argc, char *argv[]);
 // static int sonar_isr(int irq, void *context);
 
 //uint32_t MA40H1S::dma_buffer[2] = {0x04000010,0x00100400};
-uint32_t MA40H1S::dma_buffer[2] = {0x00100002,0x00020010};
-uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
-// float  MA40H1S::adc_buffer_f[ADC_BUFFER_SIZE] = {};
+//uint32_t MA40H1S::dma_buffer[2] = {0x00100002,0x00020010};
+//uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
+bool MA40H1S::timer_init = false;
+struct stm32_tim_dev_s * _tim8 = nullptr;
+struct stm32_tim_dev_s * _tim5 = nullptr;
 
-MA40H1S::MA40H1S():
-    CDev("MA40H1S", MA40H1S_DEVICE_PATH, 0),
+MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath, 
+                uint32_t gpio_dr_a, uint32_t gpio_dr_b,
+                uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
+                uint32_t adc_SQR, uint32_t adc_SMPR_config):
+    CDev("MA40H1S", devpath),
+    _dr_a_port(gpio_dr_a),
+    _dr_b_port(gpio_dr_b),
+    _ultrasonic_id(id),
+    _GPIOx_BSRR_addr(gpio_BSRR_addr),
+    _ADC_Channel(adc_SQR), 
+    _ADC_SMPR_config(adc_SMPR_config),
     _min_distance(0.28f),
-    _max_distance(2.0f),
+    _max_distance(5.0f),
     _class_instance(-1),
     _orb_class_instance(-1),
     _measure_ticks(0),
@@ -299,6 +329,9 @@ MA40H1S::MA40H1S():
     single_test_mode = false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
+    _dma_buffer[0] = dma_buff[0];
+    _dma_buffer[1] = dma_buff[1];
+    adc_buffer[ADC_BUFFER_SIZE] = {};
 }
 
 MA40H1S::~MA40H1S()
@@ -344,8 +377,8 @@ int MA40H1S::init()
             DEVICE_LOG("failed to create distance_sensor object. Did you start uOrb?");
         }
     }
-    stm32_configgpio(_gpio_tab.dr_a_port);
-    stm32_configgpio(_gpio_tab.dr_b_port);
+    stm32_configgpio(_dr_a_port);
+    stm32_configgpio(_dr_b_port);
     //stm32_configgpio(_gpio_tab.sw_a_port); 
    // stm32_configgpio(_gpio_tab.sw_b_port);
     //stm32_configgpio(GPIO_BAK_DR_B);
@@ -358,8 +391,8 @@ int MA40H1S::init()
 	
     stm32_dmasetup(
         _tx1_dma, 
-        0x40020418, // Pb 0x40020818 0x40021000
-        reinterpret_cast<uint32_t>(&dma_buffer),
+        _GPIOx_BSRR_addr, // Pb 0x40020818 0x40021000
+        reinterpret_cast<uint32_t>(&_dma_buffer),
         2,
         DMA_SCR_DIR_M2P |\
         DMA_SCR_MINC |\
@@ -370,44 +403,46 @@ int MA40H1S::init()
 	    DMA_SCR_CIRC);
     stm32_dmastart(_tx1_dma, nullptr, nullptr, false);
     // printf("tx1 dma\n");
-		   
-    _tim8 = stm32_tim_init(8);
-    if(_tim8 == NULL){
-        // printf("timer8 init failed\n");
-        return ret;
-    }
-    // printf("timer8 init success\n");
-    STM32_TIM_SETPERIOD(_tim8, 11);
-    STM32_TIM_SETCLOCK(_tim8,1000000);
-    STM32_TIM_SETMODE(_tim8,STM32_TIM_MODE_UP);
-	//STM32_TIM_SETCOMPARE(_tim8,3,11);
-	//STM32_TIM_SETCOMPARE(_tim8,2,5);
-    usleep(200000);
+	
+    if (!timer_init) {
+        _tim8 = stm32_tim_init(8);
+        if(_tim8 == NULL){
+            // printf("timer8 init failed\n");
+            return ret;
+        }
+        // printf("timer8 init success\n");
+        STM32_TIM_SETPERIOD(_tim8, 24);
+        STM32_TIM_SETCLOCK(_tim8,2000000);
+        STM32_TIM_SETMODE(_tim8,STM32_TIM_MODE_UP);
+        //STM32_TIM_SETCOMPARE(_tim8,3,11);
+        //STM32_TIM_SETCOMPARE(_tim8,2,5);
+        usleep(200000);
+
+        _tim5 = stm32_tim_init(5);
+        if(_tim5 == NULL){
+            // printf("timer5 init failed\n");
+            return ret;
+        }
+        // printf("timer5 init success\n");
+        STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, NULL, 0);
+        putreg16(0x0101,STM32_TIM5_DIER);//  putreg16(0x0101,0x40000c0c);  //STM32_TIM5_BASE:0x40000c00  STM32_GTIM_DIER_OFFSET:0x000c
+        STM32_TIM_SETPERIOD(_tim5, 4);
+        STM32_TIM_SETCLOCK(_tim5,1000000);
+        STM32_TIM_SETMODE(_tim5,STM32_TIM_MODE_UP);
+        // printf("CNT:%d\n",getreg16(0x40000c24));
+        // STM32_TIM_SETCOMPARE();
+        timer_init = true;
+    }      
 
     _cycling_rate = MA40H1S_CONVERSION_INTERVAL;
 
     /* init gpio ports */
 
-	stm32_gpiowrite(_gpio_tab.dr_a_port,false);
-    stm32_gpiowrite(_gpio_tab.dr_b_port,false);
+	stm32_gpiowrite(_dr_a_port,false);
+    stm32_gpiowrite(_dr_b_port,false);
 	//stm32_gpiowrite(_gpio_tab.sw_a_port,false);
 	//stm32_gpiowrite(_gpio_tab.sw_b_port,true);
 	// stm32_gpiosetevent(_gpio_tab.adc_port, true, false, false, sonar_isr);
-	
-	_tim5 = stm32_tim_init(5);
-	if(_tim5 == NULL){
-		// printf("timer5 init failed\n");
-		return ret;
-	}
-	// printf("timer5 init success\n");
-
-	STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, 0);
-	putreg16(0x0101,0x40000c0c);
-    STM32_TIM_SETPERIOD(_tim5, 5);
-	STM32_TIM_SETCLOCK(_tim5,1000000);
-    STM32_TIM_SETMODE(_tim5,STM32_TIM_MODE_UP);
-    // printf("CNT:%d\n",getreg16(0x40000c24));
-    // STM32_TIM_SETCOMPARE();
 
     _adc_dma = stm32_dmachannel(DMAMAP_ADC1_1);
     if(_adc_dma == nullptr || _adc_dma == NULL){
@@ -416,7 +451,7 @@ int MA40H1S::init()
     }
     stm32_dmasetup(
         _adc_dma, 
-        0x4001204c, // adc1 DR  
+        STM32_ADC1_DR, //0x4001204c, // adc1 DR  
         reinterpret_cast<uint32_t>(&adc_buffer),
         ADC_BUFFER_SIZE,
         DMA_SCR_DIR_P2M |\
@@ -429,12 +464,14 @@ int MA40H1S::init()
     // printf("adc dma\n");
 
     /* arbitrarily configure all channels for 15 cycle sample time */
-    rSMPR1 = 0b00000000000000010000000000000000;
-    rCR1 = ADC_CR1_RES_12BIT;
+    //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; // Channel 15  
+    rSMPR1 = _ADC_SMPR_config;
+    rCR1 = ADC_CR1_RES_12BIT; //Resolution
     rCR2 = 0;
     rSQR1 = 0;
     rSQR2 = 0;
-    rSQR3 = 15;  /* will be updated with the channel each tick */
+    //rSQR3 = 15;  /* will be updated with the channel each tick */
+    rSQR3 = _ADC_Channel;
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
@@ -765,19 +802,19 @@ int MA40H1S::collect()
 		goto out;
 	}
 
-	if(!_vehicle_land_detected.landed && (hrt_absolute_time() - _landed_time <1200000) && lpsp.throw_state>50){
+	if(!_vehicle_land_detected.landed && (hrt_absolute_time() - _landed_time <1e6)){
 		distance_m=0.283f;
 		pre_distance_m=0.283f;
 		goto out;
 	}
 
-    if(lpsp.throw_state==2 || lpsp.throw_state==1){
-        distance_m=1.2f;
-        goto out;
-    }
+    // if(lpsp.throw_state==2 || lpsp.throw_state==1){
+    //     distance_m=1.2f;
+    //     goto out;
+    // }
 
     if(new_value == true){
-        distance_m = ((float)_end_index*0.000954f)*0.17f*1.1f;
+        distance_m = ((float)_end_index*0.00229f)*0.17f*1.1f;   // 0.00042823
 		 //printf("%d:%d\n",_end_index,adc_buffer[_end_index]);
          //printf("dis :%.2f\n", (double)distance_m);
         new_value = false;
@@ -804,13 +841,13 @@ out:
         //PX4_WARN("ARM222222222");
     }
 
-    if(err_count > 2 && !_vehicle_land_detected.landed){
+    if(err_count > 1 && !_vehicle_land_detected.landed){
         pre_distance_m = distance_m;
     }
     //PX4_WARN("err %.2f",(double)err_count);
     //PX4_WARN("dist %.2f",(double)distance_m);
     //PX4_WARN("land %.2f",(double)_vehicle_land_detected.landed);
-    if(fabsf(distance_m-pre_distance_m)>0.5f){
+    if(fabsf(distance_m-pre_distance_m)>0.25f){
         distance_m = pre_distance_m;
         err_count ++;
     }else{
@@ -837,7 +874,7 @@ out:
 	for(int i=0;i<10;i++){
 	   sum_2 += (sonar_sample[i] - average)*(sonar_sample[i] - average);
 	}
-	if((!_vehicle_land_detected.landed && (hrt_absolute_time() - _landed_time <2200000)) || lpsp.throw_state<=4){
+	if((!_vehicle_land_detected.landed && (hrt_absolute_time() - _landed_time <1200000))){
 	   variance = 0.0f;
 	}else{
 	   variance = sum_2/10;
@@ -852,7 +889,7 @@ out:
 	report.sonar_test[0] = distance_orginal;
     report.covariance = variance;
     /* TODO: set proper ID */
-    report.id = 0;//uint32_t(distance_mid*100.0f);
+    report.id = (uint8_t)_ultrasonic_id;//uint32_t(distance_mid*100.0f);
 
     /* publish it, if we are the primary */
     if (_distance_sensor_topic != nullptr) {
@@ -988,7 +1025,7 @@ void MA40H1S::tick_trampoline(void *arg)
 int MA40H1S::timer5_interrupt(int irq, void *context)
 {
     static uint16_t ticks = 0;
-    putreg16(0xFFFE,0x40000c10);
+    putreg16(0xFFFE,STM32_TIM5_SR); // putreg16(0xFFFE,0x40000c10); //STM32_TIM5_BASE:0x40000c00    STM32_GTIM_SR_OFFSET:0x0010
     
 	switch(trig_state){
 		case 0:
@@ -1003,18 +1040,18 @@ int MA40H1S::timer5_interrupt(int irq, void *context)
 			if(ticks >= 20){
 				trig_state = 2;
 				ticks = 0;
-                putreg16(0x0145,0x4001040c);//TIM8
+                putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
 			}
 			break;
 		case 2:
 			ticks++;
-			if(ticks >= 36){
+			if(ticks >= 40){
 				putreg16(0x0000,0x4001040c);
                 // stm32_gpiowrite(_gpio_tab.sw_b_port,true);
                // stm32_gpiowrite(_gpio_tab.sw_b_port,true);
                // stm32_gpiowrite(_gpio_tab.sw_a_port,true);
-                stm32_gpiowrite(_gpio_tab.dr_a_port,false);
-                stm32_gpiowrite(_gpio_tab.dr_b_port,false);
+                stm32_gpiowrite(_dr_a_port,false);
+                stm32_gpiowrite(_dr_b_port,false);
 				trig_state = 3;
 				ticks = 0;
 			}
@@ -1073,8 +1110,12 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
 
 	rCR2 &= ~ADC_CR2_ADON;
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
-	_end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE,(float)0.02f,(int16_t)50,(float)1.0f);
-    new_value = true;
+    _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
+    if(_end_index != 1){
+        new_value = true;
+    } else {
+        new_value = false;
+    }
 }
 
 
@@ -1088,59 +1129,117 @@ namespace ma40h1s
 #endif
 const int ERROR = -1;
 
-MA40H1S *g_dev;
+/*
+    lsit of supported id configurations
+*/
+struct ma40h1s_id_option
+{
+    enum MA40H1S_ID id;
+    const char *devpath;
+    uint32_t dr_a_port;
+    uint32_t dr_b_port;
+    uint32_t gpiox_BSRR_addr;
+    uint32_t dma_buffer[2];
+    uint32_t adc_SQR;  // ADC channel selection
+    uint32_t adc_SMPR_config; //sample time configue
+    MA40H1S *dev;
+} id_options[] = {
+    { MA40H1S_ID_PRIMARY, "/dev/ma40h1s_primary", GPIO_DR_A, GPIO_DR_B, STM32_GPIOB_BSRR, {0x00100002,0x00020010}, 15, 0b00000000000000010000000000000000, NULL},
+#ifdef PX4_ULTRASONIC_EXPANSION 
+    { MA40H1S_ID_EXPANSION, "/dev/ma40h1s_expanion", , , NULL},
+#endif    
+#ifdef PX4_ULTRASONIC_EXPANSION1
+    { MA40H1S_ID_EXPANSION1, "/dev/ma40h1s_expanion1", , , NULL},
+#endif
+#ifdef PX4_ULTRASONIC_EXPANSION2    
+    { MA40H1S_ID_EXPANSION2, "/dev/ma40h1s_expanion2", , , NULL},
+#endif
+#ifdef PX4_ULTRASONIC_EXPANSION3
+    { MA40H1S_ID_EXPANSION3, "/dev/ma40h1s_expanion3", , , NULL},    
+#endif
+};
+#define NUM_ID_OPTIONS (sizeof(id_options)/sizeof(id_options[0]))
 
-void start();
+//MA40H1S *g_dev;
+
+void start(enum MA40H1S_ID ultrasonic_id);
+bool start_ultrasonic(struct id_options & ultrasonic);
+struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id);
 void stop();
-void test();
-void reset();
-void trig();
-void info();
-void test_high();
-void test_low();
+void test(enum MA40H1S_ID ultrasonic_id);
+void reset(enum MA40H1S_ID ultrasonic_id);
+void trig(enum MA40H1S_ID ultrasonic_id);
+void info(enum MA40H1S_ID ultrasonic_id);
+void test_high(enum MA40H1S_ID ultrasonic_id);
+void test_low(enum MA40H1S_ID ultrasonic_id);
+void usage();
+
+
+/**
+ * start driver for a specific ultrasonic transducer option
+ */
+bool start_ultrasonic(struct id_options & ultrasonic)
+{
+    if (ultrasonic.dev != nullptr) {
+        errx(1, "ultrasonic transducer option already started");
+    }
+
+    /* creat the driver */
+    MA40H1S *interface = new MA40H1S(ultrasonic.id, ultrasonic.devpath,
+                                     ultrasonic.dr_a_port, ultrasonic.dr_b_port,
+                                     ultrasonic.gpiox_BSRR_addr, ultrasonic.dma_buffer,
+                                     ultrasonic.adc_SQR, ultrasonic.adc_SMPR_config);
+
+    if(OK != interface->init()) {
+        delete interface;
+        PX4_INFO("no %u ultrasonic transducer device", (unsigned)ultrasonic_id);
+        return false;
+    }
+
+    ultrasonic.dev = interface;
+
+    int fd = open(ultrasonic.devpath, O_RDONLY);
+
+    if(fd < 0){
+        if(interface != nullptr){
+            delete interface;
+        }
+        errx(1,"cannot open ultrasonic device");
+    }
+
+    if(ioctl(fd,SENSORIOCSPOLLRATE, SENSOR_POLLRATE_DEFAULT) < 0){
+        close(fd);
+        if(interface != nullptr){
+            delete interface;
+        }
+        errx(1,"failed setting default poll rate");
+    }
+
+    close(fd);
+    return true;
+}
 
 /**
 * Start the driver
 */
-void start()
+void start(enum MA40H1S_ID ultrasonic_id)
 {
-    int fd;
+    bool started = false;
 
-    if(g_dev != nullptr){
-        errx(1,"already started");
+    for (unsigned i = 0; i < NUM_ID_OPTIONS; i++) {
+        if (ultrasonic_id == MA40H1S_ID_ALL && id_options[i].dev != NULL) {
+            continue;
+        }
+        if (ultrasonic_id != MA40H1S_ID_ALL && id_options[i].id != ultrasonic_id) {
+            continue;
+        }
+
+        started |= start_ultrasonic(id_options[i]);
     }
 
-    /* creat the driver */
-    g_dev = new MA40H1S();
-
-    if(g_dev == nullptr){
-        goto fail;
+    if (!started) {
+        exit(1);
     }
-
-    if(OK != g_dev->init()){
-        goto fail;
-    }
-
-    fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
-
-    if(fd < 0){
-        goto fail;
-    }
-
-    if(ioctl(fd,SENSORIOCSPOLLRATE, SENSOR_POLLRATE_DEFAULT) < 0){
-        goto fail;
-    }
-
-    exit(0);
-
-fail:
-
-    if(g_dev != nullptr){
-        delete g_dev;
-        g_dev = nullptr;
-    }
-
-    errx(1,"driver start failed");
 }
 
 /**
@@ -1160,17 +1259,36 @@ void stop()
 }
 
 /**
+* find a id_option struct for a ultrasonic_id
+*/
+struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id)
+{
+
+    for (unsigned i = 0; i < NUM_ID_OPTIONS; i++) {
+        if ((ultrasonic_id == MA40H1S_ID_ALL || 
+            ultrasonic_id == id_options[i].id) && id_options[i].dev != NULL) {
+            return id_options[i];
+        }
+    }
+
+    errx(1, "ultrasonic transducer %u does not start", (unsigned)ultrasonic_id);
+}
+
+/**
  * Perform some basic functional tests on the driver;
  * make sure we can collect data from the sensor in polled
  * and automatic modes.
  */
-void test()
+void test(enum MA40H1S_ID ultrasonic_id)
 {
+    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
     struct distance_sensor_s report;
     ssize_t sz;
     int ret;
 
-    int fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
+    const char *path = ultrasonic.devpath;
+
+    int fd = open(path,O_RDONLY);
 
     if(fd < 0 ){
         err(1,"open failed");
@@ -1179,7 +1297,7 @@ void test()
     sz = read(fd, &report, sizeof(report));
 
     if(sz != sizeof(report)){
-        err(1,"immediate read failed");
+        err(1,"%s open failed (try 'ma40h1s start')", path);
     }
 
     warnx("single read");
@@ -1224,9 +1342,12 @@ void test()
 /**
  * Reset the driver.
  */
- void reset()
+ void reset(enum MA40H1S_ID ultrasonic_id)
  {
-    int fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
+    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    const char *path = ultrasonic.devpath;
+
+    int fd = open(path,O_RDONLY);
 
     if(fd < 0 ){
         err(1,"failed ");
@@ -1243,33 +1364,33 @@ void test()
     exit(0);
  }
 
- void trig()
+ void trig(enum MA40H1S_ID ultrasonic_id)
  {
-    if(g_dev == nullptr){
-        errx(1,"driver not running");
-    }
+    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
-    g_dev->trig();
+    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
+    ultrasonic.dev->trig();
+
     exit(0);
  }
 
- void test_high()
+ void test_high(enum MA40H1S_ID ultrasonic_id)
  {
-    if(g_dev == nullptr){
-        errx(1,"driver not running");
-    }
+    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
-    g_dev->test_high();
+    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
+    ultrasonic.dev->test_high();
+
     exit(0);    
  }
 
- void test_low()
+ void test_low(enum MA40H1S_ID ultrasonic_id)
  {
-    if(g_dev == nullptr){
-        errx(1,"driver not running");
-    }
+   struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
-    g_dev->test_low();
+    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
+    ultrasonic.dev->test_low();
+
     exit(0);    
  }
 
@@ -1277,17 +1398,24 @@ void test()
 /**
  * Print a little info about the driver.
  */
- void info()
+ void info(enum MA40H1S_ID ultrasonic_id)
  {
-    if(g_dev == nullptr){
-        errx(1,"driver not running");
-    }
+    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
-    printf("stage @ %p\n",g_dev);
-    g_dev->print_info();
+    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
+    ultrasonic.dev->print_info();
 
     exit(0);
  }
+
+void usage()
+{
+
+    PX4_INFO("missing command: try 'start', 'info', 'test', 'reset', 'trig', 'high', 'low'");
+    PX4_INFO("options:");
+    PX4_INFO("      -p primary ultrasonic transducer");
+    PX4_INFO("      -e expansion ultrasonic transducer");
+}
 
 }/* namespace */
 
@@ -1311,53 +1439,80 @@ void test()
 
 int ma40h1s_main(int argc, char *argv[])
 {
+    enum MA40H1S_ID ultrasonic_id = MA40H1S_ID_ALL;
+
+    int myoptind = 1;
+    int ch;
+    const char *myoptarg = nullptr;
+
+    while ((ch = px4_getopt(argc, argv, "p:e:", &myoptind, &myoptarg)) != EOF) {
+        switch (ch) {
+        case 'p':
+            ultrasonic_id = MA40H1S_ID_PRIMARY;
+            break;
+        case 'e':
+            ultrasonic_id = (MA40H1S_ID)strol(myoptarg, NULL, 0);
+            break;
+        default:
+            ma40h1s::usage();
+            exit(0);
+        }
+    }
+
+    if (myoptind >= argc) {
+        ma40h1s::usage();
+        return 1;
+    }
+
+    const char *verb = argv[myoptind];
+
     /*
      * Start/load the driver.
      */
-    if (!strcmp(argv[1], "start")) {
-        ma40h1s::start();
+    if (!strcmp(verb, "start")) {
+        ma40h1s::start(ultrasonic_id);
     }
 
     /*
      * Stop the driver
      */
-    if (!strcmp(argv[1], "stop")) {
+    if (!strcmp(verb, "stop")) {
         ma40h1s::stop();
     }
 
     /*
      * Test the driver/device.
      */
-    if (!strcmp(argv[1], "test")) {
-        ma40h1s::test();
+    if (!strcmp(verb, "test")) {
+        ma40h1s::test(ultrasonic_id);
     }
 
     /*
      * Reset the driver.
      */
-    if (!strcmp(argv[1], "reset")) {
-        ma40h1s::reset();
+    if (!strcmp(verb, "reset")) {
+        ma40h1s::reset(ultrasonic_id);
     }
 
     // send a trig signal
-    if (!strcmp(argv[1], "trig")) {
-        ma40h1s::trig();
+    if (!strcmp(verb, "trig")) {
+        ma40h1s::trig(ultrasonic_id);
     }
 
-    if (!strcmp(argv[1], "high")) {
-        ma40h1s::test_high();
+    if (!strcmp(verb, "high")) {
+        ma40h1s::test_high(ultrasonic_id);
     }
 
-    if (!strcmp(argv[1], "low")) {
-        ma40h1s::test_low();
+    if (!strcmp(verb, "low")) {
+        ma40h1s::test_low(ultrasonic_id);
     }
 
     /*
      * Print driver information.
      */
-    if (!strcmp(argv[1], "info") || !strcmp(argv[1], "status")) {
-        ma40h1s::info();
+    if (!strcmp(verb, "info") || !strcmp(verb, "status")) {
+        ma40h1s::info(ultrasonic_id);
     }
 
-    errx(1, "unrecognized command, try 'start', 'test', 'reset' or 'info'");    
+    errx(1, "unrecognized command, try 'start', 'test', 'reset' or 'info'");   
 }

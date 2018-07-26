@@ -37,9 +37,9 @@ px4_add_module(
 	COMPILE_FLAGS
 	SRCS
 		#ma40h1s_slowSample.cpp
-		ma40h1s_fastSample.cpp
-		#ma40h1s_ZSP.cpp 
-		#sonar_decoder_c.c 
+		#ma40h1s_fastSample.cpp
+		ma40h1s_JZL.cpp 
+		sonar_decoder_c.c 
 	DEPENDS
 		platforms__common
 	)

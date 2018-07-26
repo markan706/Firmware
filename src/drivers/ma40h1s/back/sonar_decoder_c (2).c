@@ -8,7 +8,7 @@
 /* Include Files */
 #include "sonar_decoder_c.h"
 
-/* Func tion Definitions */
+/* Function Definitions */
 
 /*
  * dt_1 - 计算一阶导数的低通时间常数，默认0.02
