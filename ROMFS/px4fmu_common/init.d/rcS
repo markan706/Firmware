@@ -437,6 +437,11 @@ then
 	send_event start
 	load_mon start
 
+
+	ma40h1s -p start 
+
+
+
 	#
 	# Check if UAVCAN is enabled, default to it for ESCs
 	#
