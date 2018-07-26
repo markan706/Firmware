@@ -83,6 +83,7 @@
 
 #include <stm32_adc.h>
 #include <stm32_gpio.h>
+#include <stm32_dma.h>
 
 #include "sonar_decoder_c.c"
 /*
