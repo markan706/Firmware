@@ -268,7 +268,7 @@ private:
 
     static void tick_trampoline(void *arg);
 
-    static int timer5_interrupt(int irq, void *context);
+    static int timer5_interrupt(int irq, void *context, void *arg);
 
     static void  _dma_callback(DMA_HANDLE handle, uint8_t status, void *arg);
 
@@ -1025,7 +1025,7 @@ void MA40H1S::tick_trampoline(void *arg)
 {
 }
 
-int MA40H1S::timer5_interrupt(int irq, void *context)
+int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 {
     static uint16_t ticks = 0;
     putreg16(0xFFFE,STM32_TIM5_SR); // putreg16(0xFFFE,0x40000c10); //STM32_TIM5_BASE:0x40000c00    STM32_GTIM_SR_OFFSET:0x0010
