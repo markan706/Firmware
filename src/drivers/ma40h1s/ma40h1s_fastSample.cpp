@@ -60,7 +60,8 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 
-#include <systemlib/perf_counter.h>
+//#include <systemlib/perf_counter.h>
+#include <perf/perf_counter.h>
 #include <systemlib/err.h>
 
 #include <drivers/device/device.h>
