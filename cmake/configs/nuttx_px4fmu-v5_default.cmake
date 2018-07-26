@@ -41,6 +41,8 @@ set(config_module_list
 	drivers/vmount
 	modules/sensors
 
+	drivers/ma40h1s
+
 	#
 	# System commands
 	#
