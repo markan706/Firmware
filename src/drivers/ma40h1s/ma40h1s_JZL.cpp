@@ -1216,7 +1216,7 @@ bool start_ultrasonic(struct ma40h1s_id_option & ultrasonic)
 
     if(OK != interface->init()) {
         delete interface;
-        PX4_INFO("no %u ultrasonic transducer device", (unsigned)ultrasonic_id);
+        PX4_INFO("no %u ultrasonic transducer device", (unsigned)ultrasonic.id);
         return false;
     }
 
