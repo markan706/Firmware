@@ -28,7 +28,7 @@ unsigned short sonar_decoder_c(short wave[10000], unsigned short N)
   float b_y1;
   float y2;
   unsigned short ix;
-  bool flag;
+  boolean_T flag;
   float temp2;
   int i0;
   int n;
