@@ -40,6 +40,7 @@
 
 #include <px4_config.h>
 #include <px4_getopt.h>
+#include <px4_defines.h>
 #include <board_config.h>
 
 #include <sys/types.h>
