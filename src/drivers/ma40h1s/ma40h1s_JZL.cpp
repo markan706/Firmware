@@ -39,6 +39,7 @@
  */
 
 #include <px4_config.h>
+#include <px4_getopt.h>
 #include <board_config.h>
 
 #include <sys/types.h>
@@ -69,6 +70,8 @@
 #include <drivers/drv_adc.h>
 #include <drivers/drv_range_finder.h>
 #include <drivers/device/ringbuffer.h>
+#include <drivers/stm32/drv_io_timer.h>
+#include <drivers/drv_pwm_output.h>
 
 #include <uORB/uORB.h>
 #include <uORB/topics/subsystem_info.h>
@@ -84,8 +87,6 @@
 #include <stm32_adc.h>
 #include <stm32_gpio.h>
 #include <stm32_dma.h>
-#include <drivers/stm32/drv_io_timer.h>
-#include <drivers/drv_pwm_output.h>
 #include <getopt.h>
 
 #include "sonar_decoder_c.c"
