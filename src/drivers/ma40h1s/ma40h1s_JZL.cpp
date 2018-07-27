@@ -92,7 +92,7 @@
 #include <getopt.h>
 
 
-#include "sonar_decoder_c.c"
+//#include "sonar_decoder_c.c"
 /*
  * Register accessors.
  */
