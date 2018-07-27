@@ -147,8 +147,8 @@ class MA40H1S : public device::CDev
 {
 public:
     MA40H1S(enum MA40H1S_ID id, const char * devpath, 
-            uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
-            uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
+            // uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
+            // uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
             uint32_t adc_SQR, uint32_t adc_SMPR_config);
 
     virtual ~MA40H1S();
