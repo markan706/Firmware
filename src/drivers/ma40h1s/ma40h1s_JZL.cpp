@@ -405,18 +405,19 @@ int MA40H1S::init()
     //     return ret;
     // }
 	
-    // stm32_dmasetup(
-    //     _tx1_dma, 
-    //     _GPIOx_BSRR_addr, // Pb 0x40020818 0x40021000
-    //     reinterpret_cast<uint32_t>(&_dma_buffer),
-    //     2,
-    //     DMA_SCR_DIR_M2P |\
-    //     DMA_SCR_MINC |\
-    //     DMA_SCR_PSIZE_32BITS |\
-    //     DMA_SCR_MSIZE_32BITS |\
-    //     DMA_SCR_PBURST_SINGLE |\
-    //     DMA_SCR_MBURST_SINGLE |\
-	   //  DMA_SCR_CIRC);
+    /*
+     stm32_dmasetup(
+        _tx1_dma, 
+        _GPIOx_BSRR_addr, // Pb 0x40020818 0x40021000
+        reinterpret_cast<uint32_t>(&_dma_buffer),
+        2,
+        DMA_SCR_DIR_M2P |\
+        DMA_SCR_MINC |\
+        DMA_SCR_PSIZE_32BITS |\
+        DMA_SCR_MSIZE_32BITS |\
+        DMA_SCR_PBURST_SINGLE |\
+        DMA_SCR_MBURST_SINGLE |\
+	    DMA_SCR_CIRC);*/
     // stm32_dmastart(_tx1_dma, nullptr, nullptr, false);
     // printf("tx1 dma\n");
 	
