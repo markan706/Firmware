@@ -1287,7 +1287,7 @@ struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id)
  */
 void stop(enum MA40H1S_ID ultrasonic_id)
 {
-    struct mas40h1s_id_option & ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
     if (ultrasonic.dev != nullptr) {
         delete ultrasonic.dev;
         ultrasonic.dev = nullptr;
@@ -1307,7 +1307,7 @@ void stop(enum MA40H1S_ID ultrasonic_id)
  */
 void test(enum MA40H1S_ID ultrasonic_id)
 {
-    struct mas40h1s_id_option & ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct ma40h1s_id_option & ultrasonic = find_ultrasonic(ultrasonic_id);
     struct distance_sensor_s report;
     ssize_t sz;
     int ret;
@@ -1370,7 +1370,7 @@ void test(enum MA40H1S_ID ultrasonic_id)
  */
  void reset(enum MA40H1S_ID ultrasonic_id)
  {
-    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
     const char *path = ultrasonic.devpath;
 
     int fd = open(path,O_RDONLY);
@@ -1392,7 +1392,7 @@ void test(enum MA40H1S_ID ultrasonic_id)
 
  void trig(enum MA40H1S_ID ultrasonic_id)
  {
-    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
     PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
     ultrasonic.dev->trig();
@@ -1402,7 +1402,7 @@ void test(enum MA40H1S_ID ultrasonic_id)
 
  void test_high(enum MA40H1S_ID ultrasonic_id)
  {
-    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
     PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
     ultrasonic.dev->test_high();
@@ -1412,7 +1412,7 @@ void test(enum MA40H1S_ID ultrasonic_id)
 
  void test_low(enum MA40H1S_ID ultrasonic_id)
  {
-   struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+   struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
     PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
     ultrasonic.dev->test_low();
@@ -1426,7 +1426,7 @@ void test(enum MA40H1S_ID ultrasonic_id)
  */
  void info(enum MA40H1S_ID ultrasonic_id)
  {
-    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
 
     PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
     ultrasonic.dev->print_info();
