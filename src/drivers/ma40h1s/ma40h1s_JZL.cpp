@@ -88,7 +88,10 @@
 #include <stm32_adc.h>
 #include <stm32_gpio.h>
 #include <stm32_dma.h>
+#include <float.h>
 #include <getopt.h>
+#include <lib/conversion/rotation.h>
+
 
 #include "sonar_decoder_c.c"
 /*
