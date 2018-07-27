@@ -293,7 +293,7 @@ bool MA40H1S::_time_up = false;
 uint8_t MA40H1S::trig_state = 5;
 //bool MA40H1S::voltage_state = false;
 uint8_t MA40H1S::_echo_count = 0;
-struct stm32_tim_dev_s MA40H1S::*_tim5 = NULL; 
+struct stm32_tim_dev_s MA40H1S::_tim5 = NULL; 
 
  /*
  * Driver 'main' command.
