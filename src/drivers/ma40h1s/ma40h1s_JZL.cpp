@@ -86,6 +86,7 @@
 #include <stm32_dma.h>
 #include <drivers/stm32/drv_io_timer.h>
 #include <drivers/drv_pwm_output.h>
+#include <getopt.h>
 
 #include "sonar_decoder_c.c"
 /*
