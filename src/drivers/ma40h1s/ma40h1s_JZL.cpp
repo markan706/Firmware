@@ -656,6 +656,7 @@ int MA40H1S::ioctl(struct file *filp, int cmd, unsigned long arg)
     case RANGEFINDERSINGLEMEASURE: {
             single_test_mode = true;
             measure();
+            return 0;
         }
         break;
     case RANGEFINDERSINGLECOLLECT: {
