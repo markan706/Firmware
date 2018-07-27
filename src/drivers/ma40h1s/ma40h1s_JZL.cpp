@@ -1189,7 +1189,7 @@ struct ma40h1s_id_option
 void start(enum MA40H1S_ID ultrasonic_id);
 bool start_ultrasonic(struct ma40h1s_id_option & ultrasonic);
 struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id);
-void stop();
+void stop(enum MA40H1S_ID ultrasonic_id);
 void test(enum MA40H1S_ID ultrasonic_id);
 void reset(enum MA40H1S_ID ultrasonic_id);
 void trig(enum MA40H1S_ID ultrasonic_id);
@@ -1267,22 +1267,6 @@ void start(enum MA40H1S_ID ultrasonic_id)
 }
 
 /**
- * Stop the driver
- */
-void stop()
-{
-    if (g_dev != nullptr) {
-        delete g_dev;
-        g_dev = nullptr;
-
-    } else {
-        errx(1, "driver not running");
-    }
-
-    exit(0);
-}
-
-/**
 * find a id_option struct for a ultrasonic_id
 */
 struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id)
@@ -1297,6 +1281,24 @@ struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id)
 
     errx(1, "ultrasonic transducer %u does not start", (unsigned)ultrasonic_id);
 }
+
+/**
+ * Stop the driver
+ */
+void stop(enum MA40H1S_ID ultrasonic_id)
+{
+    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    if (ultrasonic.dev != nullptr) {
+        delete ultrasonic.dev;
+        ultrasonic.dev = nullptr;
+
+    } else {
+        errx(1, "driver not running");
+    }
+
+    exit(0);
+}
+
 
 /**
  * Perform some basic functional tests on the driver;
@@ -1501,7 +1503,7 @@ int ma40h1s_main(int argc, char *argv[])
      * Stop the driver
      */
     if (!strcmp(verb, "stop")) {
-        ma40h1s::stop();
+        ma40h1s::stop(ultrasonic_id);
     }
 
     /*
