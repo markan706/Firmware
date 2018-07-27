@@ -92,7 +92,7 @@
 #include <getopt.h>
 
 
-//#include "sonar_decoder_c.c"
+#include "sonar_decoder_c.c"
 /*
  * Register accessors.
  */
@@ -1140,7 +1140,7 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
 
 	rCR2 &= ~ADC_CR2_ADON;
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
-   // _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
+    _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
         new_value = true;
     } else {
