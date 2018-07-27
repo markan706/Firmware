@@ -84,7 +84,7 @@
 #include <stm32_adc.h>
 #include <stm32_gpio.h>
 #include <stm32_dma.h>
-//#include <drv_io_timer.h>
+#include <drv_io_timer.h>
 #include <drivers/drv_pwm_output.h>
 
 #include "sonar_decoder_c.c"
