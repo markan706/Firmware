@@ -48,4 +48,25 @@
 #define RANGE_FINDER0_DEVICE_PATH	"/dev/range_finder0"
 #define MB12XX_MAX_RANGEFINDERS	12	// Maximum number of Maxbotix sensors on bus
 
+/*
+ * ioctl() definitions
+ *
+ * Rangefinder drivers also implement the generic sensor driver
+ * interfaces from drv_sensor.h
+ */
+
+#define _RANGEFINDERIOCBASE			(0x7900)
+#define __RANGEFINDERIOC(_n)		(_IOC(_RANGEFINDERIOCBASE, _n))
+
+/** set the minimum effective distance of the device */
+#define RANGEFINDERIOCSETMINIUMDISTANCE	__RANGEFINDERIOC(1)
+
+/** set the maximum effective distance of the device */
+#define RANGEFINDERIOCSETMAXIUMDISTANCE	__RANGEFINDERIOC(2)
+
+#define RANGEFINDERSINGLEMEASURE		__RANGEFINDERIOC(3)
+#define RANGEFINDERSINGLECOLLECT		__RANGEFINDERIOC(4)
+#define RANGEFINDERGETAVR				__RANGEFINDERIOC(5)
+#define RANGEFINDERGETTHR				__RANGEFINDERIOC(6)
+
 #endif /* _DRV_RANGEFINDER_H */
