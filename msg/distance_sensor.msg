@@ -1,6 +1,6 @@
 # DISTANCE_SENSOR message data
 
-
+float32[4] sonar_test
 float32 min_distance		# Minimum distance the sensor can measure (in m)
 float32 max_distance		# Maximum distance the sensor can measure (in m)
 float32 current_distance	# Current distance reading (in m)
