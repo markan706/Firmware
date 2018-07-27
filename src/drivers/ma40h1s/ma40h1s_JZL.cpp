@@ -341,7 +341,7 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
     memset(&_call, 0, sizeof(_call));
     // _dma_buffer[0] = dma_buff[0];
     // _dma_buffer[1] = dma_buff[1];
-    adc_buffer[ADC_BUFFER_SIZE] = {};
+    // adc_buffer[ADC_BUFFER_SIZE] = {};
 }
 
 MA40H1S::~MA40H1S()
