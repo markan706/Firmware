@@ -1187,7 +1187,7 @@ struct ma40h1s_id_option
 //MA40H1S *g_dev;
 
 void start(enum MA40H1S_ID ultrasonic_id);
-bool start_ultrasonic(struct id_options & ultrasonic);
+bool start_ultrasonic(struct ma40h1s_id_option & ultrasonic);
 struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id);
 void stop();
 void test(enum MA40H1S_ID ultrasonic_id);
@@ -1202,7 +1202,7 @@ void usage();
 /**
  * start driver for a specific ultrasonic transducer option
  */
-bool start_ultrasonic(struct id_options & ultrasonic)
+bool start_ultrasonic(struct ma40h1s_id_option & ultrasonic)
 {
     if (ultrasonic.dev != nullptr) {
         errx(1, "ultrasonic transducer option already started");
