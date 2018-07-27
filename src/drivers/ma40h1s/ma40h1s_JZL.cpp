@@ -1482,7 +1482,7 @@ int ma40h1s_main(int argc, char *argv[])
             ultrasonic_id = MA40H1S_ID_PRIMARY;
             break;
         case 'e':
-            ultrasonic_id = (MA40H1S_ID)strol(myoptarg, NULL, 0);
+            ultrasonic_id = (MA40H1S_ID)strtol(myoptarg, NULL, 0);
             break;
         default:
             ma40h1s::usage();
