@@ -306,7 +306,7 @@ extern "C" __EXPORT int ma40h1s_main(int argc, char *argv[]);
 //uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
 bool MA40H1S::timer_init = false;
 // struct stm32_tim_dev_s * _tim8 = nullptr;
-struct stm32_tim_dev_s * _tim5 = nullptr;
+//struct stm32_tim_dev_s * _tim5 = nullptr;
 
 MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath, 
                 /*uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
