@@ -1058,12 +1058,9 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 				trig_state = 2;
 				ticks = 0;
                 // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
-                if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
-                    io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
-                }
-                else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
-                     io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
-                }
+                io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
+                io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
+
                 
 			}
 			break;
@@ -1076,12 +1073,9 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                // stm32_gpiowrite(_gpio_tab.sw_a_port,true);
                 // stm32_gpiowrite(_dr_a_port,false);
                 // stm32_gpiowrite(_dr_b_port,false);
-                if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
-                    io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
-                }
-                else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
-                     io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
-                }
+                io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
+                io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
+
 				trig_state = 3;
 				ticks = 0;
 			}
