@@ -84,6 +84,8 @@
 #include <stm32_adc.h>
 #include <stm32_gpio.h>
 #include <stm32_dma.h>
+//#include <drv_io_timer.h>
+#include <drivers/drv_pwm_output.h>
 
 #include "sonar_decoder_c.c"
 /*
@@ -203,12 +205,12 @@ private:
     DMA_HANDLE      _tx1_dma;
     DMA_HANDLE      _adc_dma;
 
-    static struct stm32_tim_dev_s * _tim8; 
+    // static struct stm32_tim_dev_s * _tim8; 
 	static struct stm32_tim_dev_s * _tim5; 
 
     static bool _time_up;
 
-    uint32_t     _dma_buffer[2];
+    // uint32_t     _dma_buffer[2];
     //static uint16_t     adc_buffer[ADC_BUFFER_SIZE];
     uint16_t     adc_buffer[ADC_BUFFER_SIZE];
 
@@ -221,10 +223,10 @@ private:
     //     uint32_t        dr_a_port;
     //     uint32_t        dr_b_port;
     // };
-    uint32_t        _dr_a_port;
-    uint32_t        _dr_b_port;
+    // uint32_t        _dr_a_port;
+    // uint32_t        _dr_b_port;
     enum MA40H1S_ID _ultrasonic_id;
-    uint32_t _GPIOx_BSRR_addr;
+    // uint32_t _GPIOx_BSRR_addr;
     uint32_t _ADC_Channel; 
     uint32_t _ADC_SMPR_config;
 
@@ -298,12 +300,12 @@ extern "C" __EXPORT int ma40h1s_main(int argc, char *argv[]);
 //uint32_t MA40H1S::dma_buffer[2] = {0x00100002,0x00020010};
 //uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
 bool MA40H1S::timer_init = false;
-struct stm32_tim_dev_s * _tim8 = nullptr;
+// struct stm32_tim_dev_s * _tim8 = nullptr;
 struct stm32_tim_dev_s * _tim5 = nullptr;
 
 MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath, 
-                uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
-                uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
+                /*uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
+                uint32_t gpio_BSRR_addr, uint32_t * dma_buff,*/
                 uint32_t adc_SQR, uint32_t adc_SMPR_config):
     CDev("MA40H1S", devpath),
     _min_distance(0.28f),
@@ -320,11 +322,11 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
     _last_inte(0),
     _tx1_dma(nullptr),
     _adc_dma(nullptr),
-    _dr_a_port(gpio_dr_a),
-    _dr_b_port(gpio_dr_b),
+    // _dr_a_port(gpio_dr_a),
+    // _dr_b_port(gpio_dr_b),
     _ultrasonic_id(id),
-    _GPIOx_BSRR_addr(gpio_BSRR_addr),
-    _ADC_Channel(adc_SQR), 
+    // _GPIOx_BSRR_addr(gpio_BSRR_addr),
+    // _ADC_Channel(adc_SQR), 
     _ADC_SMPR_config(adc_SMPR_config)
 {
 	_armed.armed = false;
@@ -332,8 +334,8 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
     single_test_mode = false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
-    _dma_buffer[0] = dma_buff[0];
-    _dma_buffer[1] = dma_buff[1];
+    // _dma_buffer[0] = dma_buff[0];
+    // _dma_buffer[1] = dma_buff[1];
     adc_buffer[ADC_BUFFER_SIZE] = {};
 }
 
@@ -380,46 +382,57 @@ int MA40H1S::init()
             DEVICE_LOG("failed to create distance_sensor object. Did you start uOrb?");
         }
     }
-    stm32_configgpio(_dr_a_port);
-    stm32_configgpio(_dr_b_port);
+    // stm32_configgpio(_dr_a_port);
+    // stm32_configgpio(_dr_b_port);
     //stm32_configgpio(_gpio_tab.sw_a_port); 
-   // stm32_configgpio(_gpio_tab.sw_b_port);
+    // stm32_configgpio(_gpio_tab.sw_b_port);
     //stm32_configgpio(GPIO_BAK_DR_B);
     // printf("dma init start\n");
-    _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
-    if(_tx1_dma == nullptr || _tx1_dma == NULL){
-        // printf("dma init failed\n");
-        return ret;
+    // _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
+
+    if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
+        io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
+        io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM Ch8
+        io_timer_set_rate(2, 40000);
     }
+    else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
+        io_timer_channel_init(5, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH5
+        io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM Ch6
+        io_timer_set_rate(1, 40000);
+    }
+    // if(_tx1_dma == nullptr || _tx1_dma == NULL){
+    //     // printf("dma init failed\n");
+    //     return ret;
+    // }
 	
-    stm32_dmasetup(
-        _tx1_dma, 
-        _GPIOx_BSRR_addr, // Pb 0x40020818 0x40021000
-        reinterpret_cast<uint32_t>(&_dma_buffer),
-        2,
-        DMA_SCR_DIR_M2P |\
-        DMA_SCR_MINC |\
-        DMA_SCR_PSIZE_32BITS |\
-        DMA_SCR_MSIZE_32BITS |\
-        DMA_SCR_PBURST_SINGLE |\
-        DMA_SCR_MBURST_SINGLE |\
-	    DMA_SCR_CIRC);
-    stm32_dmastart(_tx1_dma, nullptr, nullptr, false);
+    // stm32_dmasetup(
+    //     _tx1_dma, 
+    //     _GPIOx_BSRR_addr, // Pb 0x40020818 0x40021000
+    //     reinterpret_cast<uint32_t>(&_dma_buffer),
+    //     2,
+    //     DMA_SCR_DIR_M2P |\
+    //     DMA_SCR_MINC |\
+    //     DMA_SCR_PSIZE_32BITS |\
+    //     DMA_SCR_MSIZE_32BITS |\
+    //     DMA_SCR_PBURST_SINGLE |\
+    //     DMA_SCR_MBURST_SINGLE |\
+	   //  DMA_SCR_CIRC);
+    // stm32_dmastart(_tx1_dma, nullptr, nullptr, false);
     // printf("tx1 dma\n");
 	
     if (!timer_init) {
-        _tim8 = stm32_tim_init(8);
-        if(_tim8 == NULL){
-            // printf("timer8 init failed\n");
-            return ret;
-        }
-        // printf("timer8 init success\n");
-        STM32_TIM_SETPERIOD(_tim8, 24);
-        STM32_TIM_SETCLOCK(_tim8,2000000);
-        STM32_TIM_SETMODE(_tim8,STM32_TIM_MODE_UP);
-        //STM32_TIM_SETCOMPARE(_tim8,3,11);
-        //STM32_TIM_SETCOMPARE(_tim8,2,5);
-        usleep(200000);
+        // _tim8 = stm32_tim_init(8);
+        // if(_tim8 == NULL){
+        //     // printf("timer8 init failed\n");
+        //     return ret;
+        // }
+        // // printf("timer8 init success\n");
+        // STM32_TIM_SETPERIOD(_tim8, 24);
+        // STM32_TIM_SETCLOCK(_tim8,2000000);
+        // STM32_TIM_SETMODE(_tim8,STM32_TIM_MODE_UP);
+        // //STM32_TIM_SETCOMPARE(_tim8,3,11);
+        // //STM32_TIM_SETCOMPARE(_tim8,2,5);
+        // usleep(200000);
 
         _tim5 = stm32_tim_init(5);
         if(_tim5 == NULL){
@@ -441,8 +454,8 @@ int MA40H1S::init()
 
     /* init gpio ports */
 
-	stm32_gpiowrite(_dr_a_port,false);
-    stm32_gpiowrite(_dr_b_port,false);
+	// stm32_gpiowrite(_dr_a_port,false);
+ //    stm32_gpiowrite(_dr_b_port,false);
 	//stm32_gpiowrite(_gpio_tab.sw_a_port,false);
 	//stm32_gpiowrite(_gpio_tab.sw_b_port,true);
 	// stm32_gpiosetevent(_gpio_tab.adc_port, true, false, false, sonar_isr);
@@ -1043,18 +1056,31 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 			if(ticks >= 20){
 				trig_state = 2;
 				ticks = 0;
-                putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
+                // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
+                if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
+                    io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
+                }
+                else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
+                     io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
+                }
+                
 			}
 			break;
 		case 2:
 			ticks++;
 			if(ticks >= 40){
-				putreg16(0x0000,0x4001040c);
+				// putreg16(0x0000,0x4001040c);
                 // stm32_gpiowrite(_gpio_tab.sw_b_port,true);
                // stm32_gpiowrite(_gpio_tab.sw_b_port,true);
                // stm32_gpiowrite(_gpio_tab.sw_a_port,true);
-                stm32_gpiowrite(_dr_a_port,false);
-                stm32_gpiowrite(_dr_b_port,false);
+                // stm32_gpiowrite(_dr_a_port,false);
+                // stm32_gpiowrite(_dr_b_port,false);
+                if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
+                    io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
+                }
+                else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
+                     io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
+                }
 				trig_state = 3;
 				ticks = 0;
 			}
@@ -1139,15 +1165,15 @@ struct ma40h1s_id_option
 {
     enum MA40H1S_ID id;
     const char *devpath;
-    uint32_t dr_a_port;
-    uint32_t dr_b_port;
-    uint32_t gpiox_BSRR_addr;
-    uint32_t dma_buffer[2];
+    // uint32_t dr_a_port;
+    // uint32_t dr_b_port;
+    // uint32_t gpiox_BSRR_addr;
+    // uint32_t dma_buffer[2];
     uint32_t adc_SQR;  // ADC channel selection
     uint32_t adc_SMPR_config; //sample time configue
     MA40H1S *dev;
 } id_options[] = {
-    { MA40H1S_ID_PRIMARY, "/dev/ma40h1s_primary", GPIO_DR_A, GPIO_DR_B, STM32_GPIOB_BSRR, {0x00100002,0x00020010}, 15, 0b00000000000000010000000000000000, NULL},
+    { MA40H1S_ID_PRIMARY, "/dev/ma40h1s_primary", /*GPIO_DR_A, GPIO_DR_B, STM32_GPIOB_BSRR, {0x00100002,0x00020010},*/ 14, 0b00000000000000000010000000000000, NULL},
 #ifdef PX4_ULTRASONIC_EXPANSION 
     { MA40H1S_ID_EXPANSION, "/dev/ma40h1s_expanion", , , NULL},
 #endif    
@@ -1189,8 +1215,8 @@ bool start_ultrasonic(struct id_options & ultrasonic)
 
     /* creat the driver */
     MA40H1S *interface = new MA40H1S(ultrasonic.id, ultrasonic.devpath,
-                                     ultrasonic.dr_a_port, ultrasonic.dr_b_port,
-                                     ultrasonic.gpiox_BSRR_addr, ultrasonic.dma_buffer,
+                                     /*ultrasonic.dr_a_port, ultrasonic.dr_b_port,
+                                     ultrasonic.gpiox_BSRR_addr, ultrasonic.dma_buffer,*/
                                      ultrasonic.adc_SQR, ultrasonic.adc_SMPR_config);
 
     if(OK != interface->init()) {

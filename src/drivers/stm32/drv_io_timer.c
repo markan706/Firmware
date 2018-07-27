@@ -717,6 +717,19 @@ int io_timer_channel_init(unsigned channel, io_timer_channel_mode_t mode,
 		rvalue |=  setbits;
 		REG(timer, ccmr_offset) = rvalue;
 
+		if (timer == 1) {
+			rCCMR1(timer) |= (6<<12); // 6: 0110 -- OC2M -- CCMR1 -- TIM4CH2
+			rCCMR1(timer) &= ~((1<<24) | (1<<12));
+
+			rCCMR2(timer) |= (7<<4);  // 7: 0111 -- OC3M -- CCMR2 -- TIM4CH3
+			rCCMR2(timer) &= ~(1<<16);
+		}
+
+		if (timer == 2) {
+			rCCMR1(timer) |= ((7<<12) |(6<<4)); // 6: 110 -- OC1M -- CCMR1 -- TIM12CH1  7: 111 -- OC2M -- TIM12CH2
+			rCCMR1(timer) &= ~(1<<4);
+		}
+
 		/*
 		 * The beauty here is that per DocID018909 Rev 8 18.3.5 Input capture mode
 		 * As soon as CCxS (in SSMRx becomes different from 00, the channel is configured
