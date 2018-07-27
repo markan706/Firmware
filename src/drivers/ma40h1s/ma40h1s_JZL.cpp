@@ -1287,7 +1287,7 @@ struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id)
  */
 void stop(enum MA40H1S_ID ultrasonic_id)
 {
-    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct mas40h1s_id_option & ultrasonic = find_ultrasonic(ultrasonic_id);
     if (ultrasonic.dev != nullptr) {
         delete ultrasonic.dev;
         ultrasonic.dev = nullptr;
@@ -1307,7 +1307,7 @@ void stop(enum MA40H1S_ID ultrasonic_id)
  */
 void test(enum MA40H1S_ID ultrasonic_id)
 {
-    struct mas40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    struct mas40h1s_id_option & ultrasonic = find_ultrasonic(ultrasonic_id);
     struct distance_sensor_s report;
     ssize_t sz;
     int ret;
