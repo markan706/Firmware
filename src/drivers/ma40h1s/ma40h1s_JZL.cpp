@@ -216,8 +216,8 @@ private:
     static bool _time_up;
 
     // uint32_t     _dma_buffer[2];
-    //static uint16_t     adc_buffer[ADC_BUFFER_SIZE];
-    uint16_t     adc_buffer[ADC_BUFFER_SIZE];
+    static uint16_t     adc_buffer[ADC_BUFFER_SIZE];
+    // uint16_t     adc_buffer[ADC_BUFFER_SIZE];
 
     uint16_t average_sample;
     uint16_t thr_value;
@@ -303,7 +303,7 @@ extern "C" __EXPORT int ma40h1s_main(int argc, char *argv[]);
 
 //uint32_t MA40H1S::dma_buffer[2] = {0x04000010,0x00100400};
 //uint32_t MA40H1S::dma_buffer[2] = {0x00100002,0x00020010};
-//uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
+uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
 bool MA40H1S::timer_init = false;
 // struct stm32_tim_dev_s * _tim8 = nullptr;
 //struct stm32_tim_dev_s * _tim5 = nullptr;
@@ -339,9 +339,6 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
     single_test_mode = false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
-    // _dma_buffer[0] = dma_buff[0];
-    // _dma_buffer[1] = dma_buff[1];
-    // adc_buffer[ADC_BUFFER_SIZE] = {};
 }
 
 MA40H1S::~MA40H1S()
@@ -395,19 +392,28 @@ int MA40H1S::init()
     // printf("dma init start\n");
     // _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
 
-    if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
-        io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
-        io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8
-        io_timer_set_rate(2, 40000); //timer_index 2: TIM12
-        io_timer_set_ccr(7, 12);
-        io_timer_set_ccr(8, 12);
-    }
-    else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
-        io_timer_channel_init(5, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH5
-        io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH6
-        io_timer_set_rate(1, 40000); //timer_index 1: TIM4
-        io_timer_set_ccr(5, 12);
-        io_timer_set_ccr(6, 12);
+    switch (_ultrasonic_id) {
+        case MA40H1S_ID_ALL:
+        case MA40H1S_ID_PRIMARY: {
+            io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
+            io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8
+            io_timer_set_rate(2, 40000); //timer_index 2: TIM12
+            io_timer_set_ccr(7, 12);
+            io_timer_set_ccr(8, 12);
+            break; 
+        }
+
+        case MA40H1S_ID_EXPANSION: {
+            io_timer_channel_init(5, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH5
+            io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH6
+            io_timer_set_rate(1, 40000); //timer_index 1: TIM4
+            io_timer_set_ccr(5, 12);
+            io_timer_set_ccr(6, 12);
+            break;            
+        }
+
+        default:
+            break;
     }
     // if(_tx1_dma == nullptr || _tx1_dma == NULL){
     //     // printf("dma init failed\n");
@@ -1069,9 +1075,9 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 				ticks = 0;
                 // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
                 io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
+                #ifdef PX4_ULTRASONIC_EXPANSION
                 io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
-
-                
+                #endif        
 			}
 			break;
 		case 2:
@@ -1084,8 +1090,9 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 // stm32_gpiowrite(_dr_a_port,false);
                 // stm32_gpiowrite(_dr_b_port,false);
                 io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
+                #ifdef PX4_ULTRASONIC_EXPANSION
                 io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
-
+                #endif
 				trig_state = 3;
 				ticks = 0;
 			}
