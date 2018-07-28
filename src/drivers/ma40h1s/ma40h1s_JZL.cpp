@@ -397,13 +397,17 @@ int MA40H1S::init()
 
     if (_ultrasonic_id == MA40H1S_ID_ALL || _ultrasonic_id == MA40H1S_ID_PRIMARY) {
         io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
-        io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM Ch8
-        io_timer_set_rate(2, 40000);
+        io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8
+        io_timer_set_rate(2, 40000); //timer_index 2: TIM12
+        io_timer_set_ccr(7, 12);
+        io_timer_set_ccr(8, 12);
     }
     else if (_ultrasonic_id == MA40H1S_ID_EXPANSION) {
         io_timer_channel_init(5, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH5
-        io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM Ch6
-        io_timer_set_rate(1, 40000);
+        io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH6
+        io_timer_set_rate(1, 40000); //timer_index 1: TIM4
+        io_timer_set_ccr(5, 12);
+        io_timer_set_ccr(6, 12);
     }
     // if(_tx1_dma == nullptr || _tx1_dma == NULL){
     //     // printf("dma init failed\n");
