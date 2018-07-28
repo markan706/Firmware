@@ -337,7 +337,7 @@ function(px4_add_common_flags)
 		-Wall
 		-Warray-bounds
 		-Wdisabled-optimization
-		-Werror
+	#	-Werror
 		-Wextra
 		-Wfatal-errors
 		-Wfloat-equal
