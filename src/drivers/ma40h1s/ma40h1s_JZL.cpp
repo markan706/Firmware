@@ -395,20 +395,20 @@ int MA40H1S::init()
     switch (_ultrasonic_id) {
         case MA40H1S_ID_ALL:
         case MA40H1S_ID_PRIMARY: {
-            io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
-            io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8
-            io_timer_set_rate(2, 40000); //timer_index 2: TIM12
-            io_timer_set_ccr(7, 12);
-            io_timer_set_ccr(8, 12);
-            break; 
-        }
-
-        case MA40H1S_ID_EXPANSION: {
             io_timer_channel_init(5, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH5
             io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH6
             io_timer_set_rate(1, 40000); //timer_index 1: TIM4
             io_timer_set_ccr(5, 12);
             io_timer_set_ccr(6, 12);
+            break; 
+        }
+
+        case MA40H1S_ID_EXPANSION: {
+            io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
+            io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8
+            io_timer_set_rate(2, 40000); //timer_index 2: TIM12
+            io_timer_set_ccr(7, 12);
+            io_timer_set_ccr(8, 12);
             break;            
         }
 
@@ -496,8 +496,10 @@ int MA40H1S::init()
     // printf("adc dma\n");
 
     /* arbitrarily configure all channels for 15 cycle sample time */
-    //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; // Channel 15  
-    rSMPR1 = _ADC_SMPR_config;
+    //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; //  (10--18) Channel 15  
+    //rSMPR2 = 0b00 000 000 000 000 000 010 000 000 000 000; //  (0--9) Channel 4  
+    // rSMPR1 = _ADC_SMPR_config;
+    rSMPR2 = _ADC_SMPR_config;
     rCR1 = ADC_CR1_RES_12BIT; //Resolution
     rCR2 = 0;
     rSQR1 = 0;
@@ -1074,9 +1076,9 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 				trig_state = 2;
 				ticks = 0;
                 // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
-                io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
-                #ifdef PX4_ULTRASONIC_EXPANSION
                 io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
+                #ifdef PX4_ULTRASONIC_EXPANSION
+                io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
                 #endif        
 			}
 			break;
@@ -1089,9 +1091,9 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                // stm32_gpiowrite(_gpio_tab.sw_a_port,true);
                 // stm32_gpiowrite(_dr_a_port,false);
                 // stm32_gpiowrite(_dr_b_port,false);
-                io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
-                #ifdef PX4_ULTRASONIC_EXPANSION
                 io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
+                #ifdef PX4_ULTRASONIC_EXPANSION
+                io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
                 #endif
 				trig_state = 3;
 				ticks = 0;
@@ -1185,7 +1187,7 @@ struct ma40h1s_id_option
     uint32_t adc_SMPR_config; //sample time configue
     MA40H1S *dev;
 } id_options[] = {
-    { MA40H1S_ID_PRIMARY, "/dev/ma40h1s_primary", /*GPIO_DR_A, GPIO_DR_B, STM32_GPIOB_BSRR, {0x00100002,0x00020010},*/ 14, 0b00000000000000000010000000000000, NULL},
+    { MA40H1S_ID_PRIMARY, "/dev/ma40h1s_primary", /*GPIO_DR_A, GPIO_DR_B, STM32_GPIOB_BSRR, {0x00100002,0x00020010},*/ 4, 0b00000000000000000010000000000000, NULL},
 #ifdef PX4_ULTRASONIC_EXPANSION 
     { MA40H1S_ID_EXPANSION, "/dev/ma40h1s_expanion", , , NULL},
 #endif    
