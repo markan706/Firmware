@@ -318,7 +318,7 @@ uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
 //struct stm32_tim_dev_s * _tim5 = nullptr;
 
 MA40H1S::MA40H1S():
-    CDev("MA40H1S", MA40H1S_DEVICE_PATH, 0),
+    CDev("MA40H1S", MA40H1S_DEVICE_PATH),
     _min_distance(0.28f),
     _max_distance(2.0f),
     _class_instance(-1),
