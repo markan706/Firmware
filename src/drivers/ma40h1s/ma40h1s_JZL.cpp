@@ -151,10 +151,7 @@ static const int ERROR = -1;
 class MA40H1S : public device::CDev
 {
 public:
-    MA40H1S(enum MA40H1S_ID id, const char * devpath, 
-            // uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
-            // uint32_t gpio_BSRR_addr, uint32_t * dma_buff,
-            uint32_t adc_SQR, uint32_t adc_SMPR_config);
+    MA40H1S();
 
     virtual ~MA40H1S();
 
@@ -207,7 +204,7 @@ private:
 
     struct hrt_call     _call;
 
-    DMA_HANDLE      _tx1_dma;
+    // DMA_HANDLE      _tx1_dma;
     DMA_HANDLE      _adc_dma;
 
     // static struct stm32_tim_dev_s * _tim8; 
@@ -230,12 +227,19 @@ private:
     // };
     // uint32_t        _dr_a_port;
     // uint32_t        _dr_b_port;
-    enum MA40H1S_ID _ultrasonic_id;
+    
     // uint32_t _GPIOx_BSRR_addr;
-    uint32_t _ADC_Channel; 
-    uint32_t _ADC_SMPR_config;
+    // uint8_t _ADC_Channel; 
+    enum MA40H1S_ID _ultrasonic_id;
 
-    static bool timer_init;
+    struct dev_config {
+        enum MA40H1S_ID id;
+        uint8_t pwm1_ch;
+        uint8_t pwm2_ch;
+        uint8_t timer_index;
+        uint8_t adc_ch;
+    };
+    static const dev_config _ultrasonic_config[2];
     // static const GPIOConfig _gpio_tab;
     /**
     * Initialise the automatic measurement state machine and start it.
@@ -287,6 +291,12 @@ private:
 //     GPIO_DR_B
 // };
 
+const MA40H1S::dev_config MA40H1S::_ultrasonic_config[2] = {
+    {MA40H1S_ID_PRIMARY, 6, 5, 1, 4},
+    {MA40H1S_ID_EXPANSION, 8, 7, 2, 14}
+};
+
+
 hrt_abstime MA40H1S::_start_time = 0;
 bool MA40H1S::_echo_valid = false;
 bool MA40H1S::_time_up = false;
@@ -304,17 +314,13 @@ extern "C" __EXPORT int ma40h1s_main(int argc, char *argv[]);
 //uint32_t MA40H1S::dma_buffer[2] = {0x04000010,0x00100400};
 //uint32_t MA40H1S::dma_buffer[2] = {0x00100002,0x00020010};
 uint16_t MA40H1S::adc_buffer[ADC_BUFFER_SIZE] = {};
-bool MA40H1S::timer_init = false;
 // struct stm32_tim_dev_s * _tim8 = nullptr;
 //struct stm32_tim_dev_s * _tim5 = nullptr;
 
-MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath, 
-                /*uint32_t gpio_dr_a, uint32_t gpio_dr_b, 
-                uint32_t gpio_BSRR_addr, uint32_t * dma_buff,*/
-                uint32_t adc_SQR, uint32_t adc_SMPR_config):
-    CDev("MA40H1S", devpath),
+MA40H1S::MA40H1S():
+    CDev("MA40H1S", MA40H1S_DEVICE_PATH, 0),
     _min_distance(0.28f),
-    _max_distance(5.0f),
+    _max_distance(2.0f),
     _class_instance(-1),
     _orb_class_instance(-1),
     _measure_ticks(0),
@@ -325,17 +331,11 @@ MA40H1S::MA40H1S(enum MA40H1S_ID id, const char * devpath,
     _end_time(0),
     _end_index(0),
     _last_inte(0),
-    _tx1_dma(nullptr),
-    _adc_dma(nullptr),
-    // _dr_a_port(gpio_dr_a),
-    // _dr_b_port(gpio_dr_b),
-    _ultrasonic_id(id),
-    // _GPIOx_BSRR_addr(gpio_BSRR_addr),
-    _ADC_Channel(adc_SQR), 
-    _ADC_SMPR_config(adc_SMPR_config)
+    // _tx1_dma(nullptr),
+    _adc_dma(nullptr)
 {
-	_armed.armed = false;
-	_vehicle_land_detected.landed = true;
+    _armed.armed = false;
+    _vehicle_land_detected.landed = true;
     single_test_mode = false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
@@ -392,29 +392,13 @@ int MA40H1S::init()
     // printf("dma init start\n");
     // _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
 
-    switch (_ultrasonic_id) {
-        case MA40H1S_ID_ALL:
-        case MA40H1S_ID_PRIMARY: {
-            io_timer_channel_init(7, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7
-            io_timer_channel_init(8, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8
-            io_timer_set_rate(2, 40000); //timer_index 2: TIM12
-            io_timer_set_ccr(7, 12);
-            io_timer_set_ccr(8, 12);
-            break; 
-        }
+    _ultrasonic_id = _ultrasonic_config[0].id;
+    io_timer_channel_init(_ultrasonic_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
+    io_timer_channel_init(_ultrasonic_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
+    io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
+    io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
+    io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 12);
 
-        case MA40H1S_ID_EXPANSION: {
-            io_timer_channel_init(5, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH5
-            io_timer_channel_init(6, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH6
-            io_timer_set_rate(1, 40000); //timer_index 1: TIM4
-            io_timer_set_ccr(5, 12);
-            io_timer_set_ccr(6, 12);
-            break;            
-        }
-
-        default:
-            break;
-    }
     // if(_tx1_dma == nullptr || _tx1_dma == NULL){
     //     // printf("dma init failed\n");
     //     return ret;
@@ -436,35 +420,36 @@ int MA40H1S::init()
     // stm32_dmastart(_tx1_dma, nullptr, nullptr, false);
     // printf("tx1 dma\n");
 	
-    if (!timer_init) {
-        // _tim8 = stm32_tim_init(8);
-        // if(_tim8 == NULL){
-        //     // printf("timer8 init failed\n");
-        //     return ret;
-        // }
-        // // printf("timer8 init success\n");
-        // STM32_TIM_SETPERIOD(_tim8, 24);
-        // STM32_TIM_SETCLOCK(_tim8,2000000);
-        // STM32_TIM_SETMODE(_tim8,STM32_TIM_MODE_UP);
-        // //STM32_TIM_SETCOMPARE(_tim8,3,11);
-        // //STM32_TIM_SETCOMPARE(_tim8,2,5);
-        // usleep(200000);
+ 
+    // _tim8 = stm32_tim_init(8);
+    // if(_tim8 == NULL){
+    //     // printf("timer8 init failed\n");
+    //     return ret;
+    // }
+    // // printf("timer8 init success\n");
+    // STM32_TIM_SETPERIOD(_tim8, 24);
+    // STM32_TIM_SETCLOCK(_tim8,2000000);
+    // STM32_TIM_SETMODE(_tim8,STM32_TIM_MODE_UP);
+    // //STM32_TIM_SETCOMPARE(_tim8,3,11);
+    // //STM32_TIM_SETCOMPARE(_tim8,2,5);
+    // usleep(200000);
 
-        _tim5 = stm32_tim_init(5);
-        if(_tim5 == NULL){
-            // printf("timer5 init failed\n");
-            return ret;
-        }
-        // printf("timer5 init success\n");
-        STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, NULL, 0);
-        putreg16(0x0101,STM32_TIM5_DIER);//  putreg16(0x0101,0x40000c0c);  //STM32_TIM5_BASE:0x40000c00  STM32_GTIM_DIER_OFFSET:0x000c
-        STM32_TIM_SETPERIOD(_tim5, 4);
-        STM32_TIM_SETCLOCK(_tim5,1000000);
-        STM32_TIM_SETMODE(_tim5,STM32_TIM_MODE_UP);
-        // printf("CNT:%d\n",getreg16(0x40000c24));
-        // STM32_TIM_SETCOMPARE();
-        timer_init = true;
-    }      
+    _tim5 = stm32_tim_init(5);
+    if(_tim5 == NULL){
+        // printf("timer5 init failed\n");
+        return ret;
+    }
+    // printf("timer5 init success\n");
+    enum MA40H1S_ID * pdev_id =  &_ultrasonic_id;
+    STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, pdev_id, 0);
+    putreg16(0x0101,STM32_TIM5_DIER);//  putreg16(0x0101,0x40000c0c);  //STM32_TIM5_BASE:0x40000c00  STM32_GTIM_DIER_OFFSET:0x000c
+    STM32_TIM_SETPERIOD(_tim5, 4);
+    STM32_TIM_SETCLOCK(_tim5,1000000);
+    STM32_TIM_SETMODE(_tim5,STM32_TIM_MODE_UP);
+    // printf("CNT:%d\n",getreg16(0x40000c24));
+    // STM32_TIM_SETCOMPARE();
+
+     
 
     _cycling_rate = MA40H1S_CONVERSION_INTERVAL;
 
@@ -496,14 +481,16 @@ int MA40H1S::init()
     // printf("adc dma\n");
 
     /* arbitrarily configure all channels for 15 cycle sample time */
-    //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; // Channel 15  
-    rSMPR1 = _ADC_SMPR_config;
+    //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; //  10--18  Channel 15
+    //rSMPR2 = 0b00 000 000 000 000 010 000 000 000 000 000; //  0--9  Channel 5
+    rSMPR1 = 0b00000000000000000010000000000000; //  set sample time of adc_ch14 to 010 (28T)
+    rSMPR2 = 0b00000000000000000010000000000000; // set sample time of adc_ch4 to 010 (28T)
     rCR1 = ADC_CR1_RES_12BIT; //Resolution
     rCR2 = 0;
     rSQR1 = 0;
     rSQR2 = 0;
     //rSQR3 = 15;  /* will be updated with the channel each tick */
-    rSQR3 = _ADC_Channel;
+    rSQR3 = _ultrasonic_config[0].adc_ch;
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
@@ -931,6 +918,17 @@ out:
 
     _reports->force(&report);
 
+    static uint8_t k = 0;
+    static uint8_t num_dev = sizeof(_ultrasonic_config)/sizeof(_ultrasonic_config[0]);
+    if ((k++) >= num_dev) k = 0;
+    _ultrasonic_id = _ultrasonic_config[k].id;
+    io_timer_channel_init(_ultrasonic_config[k].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
+    io_timer_channel_init(_ultrasonic_config[k].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
+    io_timer_set_rate(_ultrasonic_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
+    io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch, 12);
+    io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch, 12);
+    rSQR3 = _ultrasonic_config[k].adc_ch;
+
     /* notify anyone waiting for data */
     poll_notify(POLLIN);
 
@@ -1057,6 +1055,7 @@ void MA40H1S::tick_trampoline(void *arg)
 
 int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 {
+    enum MA40H1S_ID *pdev_id = (enum MA40H1S_ID *)arg;
     static uint16_t ticks = 0;
     putreg16(0xFFFE,STM32_TIM5_SR); // putreg16(0xFFFE,0x40000c10); //STM32_TIM5_BASE:0x40000c00    STM32_GTIM_SR_OFFSET:0x0010
     
@@ -1074,10 +1073,12 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 				trig_state = 2;
 				ticks = 0;
                 // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
-                io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000);
-                #ifdef PX4_ULTRASONIC_EXPANSION
-                io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
-                #endif        
+               if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
+                    io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000); // PWM-ch5 PWM-ch6
+               }
+               else if ((*pdev_id) == MA40H1S_ID_EXPANSION) {
+                    io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000); // PWM-ch7 PWM-ch8
+               }                  
 			}
 			break;
 		case 2:
@@ -1089,10 +1090,12 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                // stm32_gpiowrite(_gpio_tab.sw_a_port,true);
                 // stm32_gpiowrite(_dr_a_port,false);
                 // stm32_gpiowrite(_dr_b_port,false);
-                io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
-                #ifdef PX4_ULTRASONIC_EXPANSION
-                io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
-                #endif
+                if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
+                    io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
+                }
+                else if ((*pdev_id) == MA40H1S_ID_EXPANSION) {
+                    io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
+                } 
 				trig_state = 3;
 				ticks = 0;
 			}
@@ -1170,144 +1173,69 @@ namespace ma40h1s
 #endif
 const int ERROR = -1;
 
-/*
-    lsit of supported id configurations
-*/
-struct ma40h1s_id_option
-{
-    enum MA40H1S_ID id;
-    const char *devpath;
-    // uint32_t dr_a_port;
-    // uint32_t dr_b_port;
-    // uint32_t gpiox_BSRR_addr;
-    // uint32_t dma_buffer[2];
-    uint32_t adc_SQR;  // ADC channel selection
-    uint32_t adc_SMPR_config; //sample time configue
-    MA40H1S *dev;
-} id_options[] = {
-    { MA40H1S_ID_PRIMARY, "/dev/ma40h1s_primary", /*GPIO_DR_A, GPIO_DR_B, STM32_GPIOB_BSRR, {0x00100002,0x00020010},*/ 14, 0b00000000000000000010000000000000, NULL},
-#ifdef PX4_ULTRASONIC_EXPANSION 
-    { MA40H1S_ID_EXPANSION, "/dev/ma40h1s_expanion", , , NULL},
-#endif    
-#ifdef PX4_ULTRASONIC_EXPANSION1
-    { MA40H1S_ID_EXPANSION1, "/dev/ma40h1s_expanion1", , , NULL},
-#endif
-#ifdef PX4_ULTRASONIC_EXPANSION2    
-    { MA40H1S_ID_EXPANSION2, "/dev/ma40h1s_expanion2", , , NULL},
-#endif
-#ifdef PX4_ULTRASONIC_EXPANSION3
-    { MA40H1S_ID_EXPANSION3, "/dev/ma40h1s_expanion3", , , NULL},    
-#endif
-};
-#define NUM_ID_OPTIONS (sizeof(id_options)/sizeof(id_options[0]))
+MA40H1S *g_dev;
 
-//MA40H1S *g_dev;
-
-void start(enum MA40H1S_ID ultrasonic_id);
-bool start_ultrasonic(struct ma40h1s_id_option & ultrasonic);
-struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id);
-void stop(enum MA40H1S_ID ultrasonic_id);
-void test(enum MA40H1S_ID ultrasonic_id);
-void reset(enum MA40H1S_ID ultrasonic_id);
-void trig(enum MA40H1S_ID ultrasonic_id);
-void info(enum MA40H1S_ID ultrasonic_id);
-void test_high(enum MA40H1S_ID ultrasonic_id);
-void test_low(enum MA40H1S_ID ultrasonic_id);
-void usage();
-
-
-/**
- * start driver for a specific ultrasonic transducer option
- */
-bool start_ultrasonic(struct ma40h1s_id_option & ultrasonic)
-{
-    if (ultrasonic.dev != nullptr) {
-        errx(1, "ultrasonic transducer option already started");
-    }
-
-    /* creat the driver */
-    MA40H1S *interface = new MA40H1S(ultrasonic.id, ultrasonic.devpath,
-                                     /*ultrasonic.dr_a_port, ultrasonic.dr_b_port,
-                                     ultrasonic.gpiox_BSRR_addr, ultrasonic.dma_buffer,*/
-                                     ultrasonic.adc_SQR, ultrasonic.adc_SMPR_config);
-
-    if(OK != interface->init()) {
-        delete interface;
-        PX4_INFO("no %u ultrasonic transducer device", (unsigned)ultrasonic.id);
-        return false;
-    }
-
-    ultrasonic.dev = interface;
-
-    int fd = open(ultrasonic.devpath, O_RDONLY);
-
-    if(fd < 0){
-        if(interface != nullptr){
-            delete interface;
-        }
-        errx(1,"cannot open ultrasonic device");
-    }
-
-    if(ioctl(fd,SENSORIOCSPOLLRATE, SENSOR_POLLRATE_DEFAULT) < 0){
-        close(fd);
-        if(interface != nullptr){
-            delete interface;
-        }
-        errx(1,"failed setting default poll rate");
-    }
-
-    close(fd);
-    return true;
-}
+void start();
+void stop();
+void test();
+void reset();
+void trig();
+void info();
+void test_high();
+void test_low();
 
 /**
 * Start the driver
 */
-void start(enum MA40H1S_ID ultrasonic_id)
+void start()
 {
-    bool started = false;
+    int fd;
 
-    for (unsigned i = 0; i < NUM_ID_OPTIONS; i++) {
-        if (ultrasonic_id == MA40H1S_ID_ALL && id_options[i].dev != NULL) {
-            continue;
-        }
-        if (ultrasonic_id != MA40H1S_ID_ALL && id_options[i].id != ultrasonic_id) {
-            continue;
-        }
-
-        started |= start_ultrasonic(id_options[i]);
+    if(g_dev != nullptr){
+        errx(1,"already started");
     }
 
-    if (!started) {
-        exit(1);
-    }
-}
+    /* creat the driver */
+    g_dev = new MA40H1S();
 
-/**
-* find a id_option struct for a ultrasonic_id
-*/
-struct ma40h1s_id_option &find_ultrasonic(enum MA40H1S_ID ultrasonic_id)
-{
-
-    for (unsigned i = 0; i < NUM_ID_OPTIONS; i++) {
-        if ((ultrasonic_id == MA40H1S_ID_ALL || 
-            ultrasonic_id == id_options[i].id) && id_options[i].dev != NULL) {
-            return id_options[i];
-        }
+    if(g_dev == nullptr){
+        goto fail;
     }
 
-    errx(1, "ultrasonic transducer %u does not start", (unsigned)ultrasonic_id);
+    if(OK != g_dev->init()){
+        goto fail;
+    }
+
+    fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
+
+    if(fd < 0){
+        goto fail;
+    }
+
+    if(ioctl(fd,SENSORIOCSPOLLRATE, SENSOR_POLLRATE_DEFAULT) < 0){
+        goto fail;
+    }
+
+    exit(0);
+
+fail:
+
+    if(g_dev != nullptr){
+        delete g_dev;
+        g_dev = nullptr;
+    }
+
+    errx(1,"driver start failed");
 }
 
 /**
  * Stop the driver
  */
-void stop(enum MA40H1S_ID ultrasonic_id)
+void stop()
 {
-    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
-    if (ultrasonic.dev != nullptr) {
-        delete ultrasonic.dev;
-        ultrasonic.dev = nullptr;
+    if (g_dev != nullptr) {
+        delete g_dev;
+        g_dev = nullptr;
 
     } else {
         errx(1, "driver not running");
@@ -1316,22 +1244,18 @@ void stop(enum MA40H1S_ID ultrasonic_id)
     exit(0);
 }
 
-
 /**
  * Perform some basic functional tests on the driver;
  * make sure we can collect data from the sensor in polled
  * and automatic modes.
  */
-void test(enum MA40H1S_ID ultrasonic_id)
+void test()
 {
-    struct ma40h1s_id_option & ultrasonic = find_ultrasonic(ultrasonic_id);
     struct distance_sensor_s report;
     ssize_t sz;
     int ret;
 
-    const char *path = ultrasonic.devpath;
-
-    int fd = open(path,O_RDONLY);
+    int fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
 
     if(fd < 0 ){
         err(1,"open failed");
@@ -1340,7 +1264,7 @@ void test(enum MA40H1S_ID ultrasonic_id)
     sz = read(fd, &report, sizeof(report));
 
     if(sz != sizeof(report)){
-        err(1,"%s open failed (try 'ma40h1s start')", path);
+        err(1,"immediate read failed");
     }
 
     warnx("single read");
@@ -1385,12 +1309,9 @@ void test(enum MA40H1S_ID ultrasonic_id)
 /**
  * Reset the driver.
  */
- void reset(enum MA40H1S_ID ultrasonic_id)
+ void reset()
  {
-    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
-    const char *path = ultrasonic.devpath;
-
-    int fd = open(path,O_RDONLY);
+    int fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
 
     if(fd < 0 ){
         err(1,"failed ");
@@ -1407,33 +1328,33 @@ void test(enum MA40H1S_ID ultrasonic_id)
     exit(0);
  }
 
- void trig(enum MA40H1S_ID ultrasonic_id)
+ void trig()
  {
-    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    if(g_dev == nullptr){
+        errx(1,"driver not running");
+    }
 
-    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
-    ultrasonic.dev->trig();
-
+    g_dev->trig();
     exit(0);
  }
 
- void test_high(enum MA40H1S_ID ultrasonic_id)
+ void test_high()
  {
-    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    if(g_dev == nullptr){
+        errx(1,"driver not running");
+    }
 
-    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
-    ultrasonic.dev->test_high();
-
+    g_dev->test_high();
     exit(0);    
  }
 
- void test_low(enum MA40H1S_ID ultrasonic_id)
+ void test_low()
  {
-   struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    if(g_dev == nullptr){
+        errx(1,"driver not running");
+    }
 
-    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
-    ultrasonic.dev->test_low();
-
+    g_dev->test_low();
     exit(0);    
  }
 
@@ -1441,24 +1362,17 @@ void test(enum MA40H1S_ID ultrasonic_id)
 /**
  * Print a little info about the driver.
  */
- void info(enum MA40H1S_ID ultrasonic_id)
+ void info()
  {
-    struct ma40h1s_id_option &ultrasonic = find_ultrasonic(ultrasonic_id);
+    if(g_dev == nullptr){
+        errx(1,"driver not running");
+    }
 
-    PX4_INFO("ultrasonic transducer %u (%s) is running.\n", (unsigned)ultrasonic.id, ultrasonic.devpath);
-    ultrasonic.dev->print_info();
+    printf("stage @ %p\n",g_dev);
+    g_dev->print_info();
 
     exit(0);
  }
-
-void usage()
-{
-
-    PX4_INFO("missing command: try 'start', 'info', 'test', 'reset', 'trig', 'high', 'low'");
-    PX4_INFO("options:");
-    PX4_INFO("      -p primary ultrasonic transducer");
-    PX4_INFO("      -e expansion ultrasonic transducer");
-}
 
 }/* namespace */
 
@@ -1482,80 +1396,53 @@ void usage()
 
 int ma40h1s_main(int argc, char *argv[])
 {
-    enum MA40H1S_ID ultrasonic_id = MA40H1S_ID_ALL;
-
-    int myoptind = 1;
-    int ch;
-    const char *myoptarg = nullptr;
-
-    while ((ch = px4_getopt(argc, argv, "p:e:", &myoptind, &myoptarg)) != EOF) {
-        switch (ch) {
-        case 'p':
-            ultrasonic_id = MA40H1S_ID_PRIMARY;
-            break;
-        case 'e':
-            ultrasonic_id = (MA40H1S_ID)strtol(myoptarg, NULL, 0);
-            break;
-        default:
-            ma40h1s::usage();
-            exit(0);
-        }
-    }
-
-    if (myoptind >= argc) {
-        ma40h1s::usage();
-        return 1;
-    }
-
-    const char *verb = argv[myoptind];
-
     /*
      * Start/load the driver.
      */
-    if (!strcmp(verb, "start")) {
-        ma40h1s::start(ultrasonic_id);
+    if (!strcmp(argv[1], "start")) {
+        ma40h1s::start();
     }
 
     /*
      * Stop the driver
      */
-    if (!strcmp(verb, "stop")) {
-        ma40h1s::stop(ultrasonic_id);
+    if (!strcmp(argv[1], "stop")) {
+        ma40h1s::stop();
     }
 
     /*
      * Test the driver/device.
      */
-    if (!strcmp(verb, "test")) {
-        ma40h1s::test(ultrasonic_id);
+    if (!strcmp(argv[1], "test")) {
+        ma40h1s::test();
     }
 
     /*
      * Reset the driver.
      */
-    if (!strcmp(verb, "reset")) {
-        ma40h1s::reset(ultrasonic_id);
+    if (!strcmp(argv[1], "reset")) {
+        ma40h1s::reset();
     }
 
     // send a trig signal
-    if (!strcmp(verb, "trig")) {
-        ma40h1s::trig(ultrasonic_id);
+    if (!strcmp(argv[1], "trig")) {
+        ma40h1s::trig();
     }
 
-    if (!strcmp(verb, "high")) {
-        ma40h1s::test_high(ultrasonic_id);
+    if (!strcmp(argv[1], "high")) {
+        ma40h1s::test_high();
     }
 
-    if (!strcmp(verb, "low")) {
-        ma40h1s::test_low(ultrasonic_id);
+    if (!strcmp(argv[1], "low")) {
+        ma40h1s::test_low();
     }
 
     /*
      * Print driver information.
      */
-    if (!strcmp(verb, "info") || !strcmp(verb, "status")) {
-        ma40h1s::info(ultrasonic_id);
+    if (!strcmp(argv[1], "info") || !strcmp(argv[1], "status")) {
+        ma40h1s::info();
     }
 
-    errx(1, "unrecognized command, try 'start', 'test', 'reset' or 'info'");   
+    errx(1, "unrecognized command, try 'start', 'test', 'reset' or 'info'");  
 }
