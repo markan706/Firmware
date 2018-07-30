@@ -239,7 +239,7 @@ private:
         uint8_t timer_index;
         uint8_t adc_ch;
     };
-    static const dev_config _ultrasonic_config[2];
+    static const dev_config _ultrasonic_config[NUM_OF_ULTRASONIC_DEV];
     // static const GPIOConfig _gpio_tab;
     /**
     * Initialise the automatic measurement state machine and start it.
@@ -291,9 +291,11 @@ private:
 //     GPIO_DR_B
 // };
 
-const MA40H1S::dev_config MA40H1S::_ultrasonic_config[2] = {
-    {MA40H1S_ID_PRIMARY, 6, 5, 1, 4},
-    {MA40H1S_ID_EXPANSION, 8, 7, 2, 14}
+const MA40H1S::dev_config MA40H1S::_ultrasonic_config[NUM_OF_ULTRASONIC_DEV] = {
+    {MA40H1S_ID_PRIMARY, 6, 5, 1, 4}
+    #if (NUM_OF_ULTRASONIC_DEV == 2)
+    ,{MA40H1S_ID_EXPANSION, 8, 7, 2, 14}
+    #endif
 };
 
 
@@ -919,9 +921,8 @@ out:
     _reports->force(&report);
 
     static uint8_t k = 0;
-    static uint8_t num_dev = sizeof(_ultrasonic_config)/sizeof(_ultrasonic_config[0]);
     if (trig_state == 5) {
-        if ((++k) >= num_dev) k = 0;
+        if ((++k) >= NUM_OF_ULTRASONIC_DEV) k = 0;
         _ultrasonic_id = _ultrasonic_config[k].id;
         io_timer_channel_init(_ultrasonic_config[k].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
         io_timer_channel_init(_ultrasonic_config[k].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
