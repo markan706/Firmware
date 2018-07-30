@@ -920,14 +920,16 @@ out:
 
     static uint8_t k = 0;
     static uint8_t num_dev = sizeof(_ultrasonic_config)/sizeof(_ultrasonic_config[0]);
-    if ((k++) >= num_dev) k = 0;
-    _ultrasonic_id = _ultrasonic_config[k].id;
-    io_timer_channel_init(_ultrasonic_config[k].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
-    io_timer_channel_init(_ultrasonic_config[k].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
-    io_timer_set_rate(_ultrasonic_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
-    io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch, 12);
-    io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch, 12);
-    rSQR3 = _ultrasonic_config[k].adc_ch;
+    if (trig_state == 5) {
+        if ((++k) >= num_dev) k = 0;
+        _ultrasonic_id = _ultrasonic_config[k].id;
+        io_timer_channel_init(_ultrasonic_config[k].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
+        io_timer_channel_init(_ultrasonic_config[k].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
+        io_timer_set_rate(_ultrasonic_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
+        io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch, 12);
+        io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch, 12);
+        rSQR3 = _ultrasonic_config[k].adc_ch;
+    }
 
     /* notify anyone waiting for data */
     poll_notify(POLLIN);
