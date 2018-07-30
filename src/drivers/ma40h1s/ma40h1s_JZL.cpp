@@ -293,7 +293,7 @@ private:
 
 const MA40H1S::dev_config MA40H1S::_ultrasonic_config[NUM_OF_ULTRASONIC_DEV] = {
     {MA40H1S_ID_PRIMARY, 6, 5, 1, 4}
-    #if (NUM_OF_ULTRASONIC_DEV == 2)
+    #if (NUM_OF_ULTRASONIC_DEV > 1)
     ,{MA40H1S_ID_EXPANSION, 8, 7, 2, 14}
     #endif
 };
