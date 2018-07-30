@@ -48,6 +48,10 @@
 #define RANGE_FINDER0_DEVICE_PATH	"/dev/range_finder0"
 #define MB12XX_MAX_RANGEFINDERS	12	// Maximum number of Maxbotix sensors on bus
 
+
+/* Configuration Constants */
+#define MA40H1S_DEVICE_PATH "/dev/ma40h1s"
+
 /*
  * ioctl() definitions
  *
