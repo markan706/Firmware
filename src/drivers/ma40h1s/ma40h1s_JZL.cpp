@@ -479,9 +479,9 @@ int MA40H1S::init()
         DMA_SCR_MSIZE_16BITS |\
         DMA_SCR_PBURST_SINGLE |\
         DMA_SCR_MBURST_SINGLE);//DMA_SCR_CIRC
+    PX4_WARN("_ADC_dma setup");
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     // printf("adc dma\n");
-    PX4_WARN("_ADC_dma start");
     /* arbitrarily configure all channels for 15 cycle sample time */
     //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; //  10--18  Channel 15
     //rSMPR2 = 0b00 000 000 000 000 010 000 000 000 000 000; //  0--9  Channel 5
