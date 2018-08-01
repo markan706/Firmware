@@ -1202,12 +1202,16 @@ void start()
     g_dev = new MA40H1S();
 
     if(g_dev == nullptr){
-        errx(1, "g_dev is nullptr");
-        //goto fail;
+        goto fail;
     }
 
     if(OK != g_dev->init()){
-        goto fail;
+        if(g_dev != nullptr){
+        delete g_dev;
+        g_dev = nullptr;
+        }
+        errx(1,"driver inint failed");
+        // goto fail;
     }
 
     fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
