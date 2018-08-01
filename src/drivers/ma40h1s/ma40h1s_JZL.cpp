@@ -1202,7 +1202,8 @@ void start()
     g_dev = new MA40H1S();
 
     if(g_dev == nullptr){
-        goto fail;
+        errx(1, "g_dev is nullptr");
+        //goto fail;
     }
 
     if(OK != g_dev->init()){
