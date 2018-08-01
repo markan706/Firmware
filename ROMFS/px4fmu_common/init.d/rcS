@@ -438,7 +438,7 @@ then
 	load_mon start
 
 
-	ma40h1s start 
+	#ma40h1s start 
 
 	#
 	# Check if UAVCAN is enabled, default to it for ESCs
