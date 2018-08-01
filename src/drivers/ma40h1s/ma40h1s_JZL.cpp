@@ -363,7 +363,6 @@ int MA40H1S::init()
 
     /* do super class device init first*/
     if(CDev::init() != OK){
-        PX4_WARN("CDev::int() fail");
         return ret;
     }
 
@@ -371,7 +370,6 @@ int MA40H1S::init()
     _reports = new ringbuffer::RingBuffer(2, sizeof(distance_sensor_s));
 
     if (_reports == nullptr) {
-        PX4_WARN("fail to create ringbuffer");
         return ret;
     }
 
@@ -440,7 +438,8 @@ int MA40H1S::init()
 
     _tim5 = stm32_tim_init(5);
     if(_tim5 == NULL){
-        printf("timer5 init failed\n");
+        // printf("timer5 init failed\n");
+        PX4_WARN("Timer5 init failed");
         return ret;
     }
     // printf("timer5 init success\n");
