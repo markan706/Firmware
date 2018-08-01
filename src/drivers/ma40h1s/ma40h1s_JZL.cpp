@@ -451,7 +451,7 @@ int MA40H1S::init()
     STM32_TIM_SETMODE(_tim5,STM32_TIM_MODE_UP);
     // printf("CNT:%d\n",getreg16(0x40000c24));
     // STM32_TIM_SETCOMPARE();
-
+    PX4_WARN("Timer5 setting");
      
 
     _cycling_rate = MA40H1S_CONVERSION_INTERVAL;
