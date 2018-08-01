@@ -363,6 +363,7 @@ int MA40H1S::init()
 
     /* do super class device init first*/
     if(CDev::init() != OK){
+        PX4_WARN("CDev::int() fail");
         return ret;
     }
 
@@ -370,6 +371,7 @@ int MA40H1S::init()
     _reports = new ringbuffer::RingBuffer(2, sizeof(distance_sensor_s));
 
     if (_reports == nullptr) {
+        PX4_WARN("fail to create ringbuffer");
         return ret;
     }
 
@@ -438,7 +440,7 @@ int MA40H1S::init()
 
     _tim5 = stm32_tim_init(5);
     if(_tim5 == NULL){
-        // printf("timer5 init failed\n");
+        printf("timer5 init failed\n");
         return ret;
     }
     // printf("timer5 init success\n");
@@ -465,7 +467,7 @@ int MA40H1S::init()
 
     _adc_dma = stm32_dmachannel(DMAMAP_ADC1_1);
     if(_adc_dma == nullptr || _adc_dma == NULL){
-        // printf("adc dma init failed\n");
+        printf("adc dma init failed\n");
         return ret;
     }
     stm32_dmasetup(
@@ -514,7 +516,7 @@ int MA40H1S::init()
     rCR2 |= ADC_CR2_DMA;
     // rCR2 |= ADC_CR2_SWSTART;
     // printf("adc init success\n");
-   // PX4_INFO("ma40h1s start!");
+   PX4_INFO("ma40h1s start!");
     ret = OK;
 
     return ret;
