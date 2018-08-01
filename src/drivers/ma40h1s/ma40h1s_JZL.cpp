@@ -1217,23 +1217,34 @@ void start()
     fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
 
     if(fd < 0){
-        goto fail;
+        if(g_dev != nullptr){
+        delete g_dev;
+        g_dev = nullptr;
+        }
+        errx(1,"driver fd open failed");
+        // goto fail;
     }
 
     if(ioctl(fd,SENSORIOCSPOLLRATE, SENSOR_POLLRATE_DEFAULT) < 0){
-        goto fail;
+        
+        if(g_dev != nullptr){
+        delete g_dev;
+        g_dev = nullptr;
+        }
+        errx(1,"driver ioctl start failed");
+        // goto fail;
     }
 
     exit(0);
 
-fail:
+// fail:
 
-    if(g_dev != nullptr){
-        delete g_dev;
-        g_dev = nullptr;
-    }
+//     if(g_dev != nullptr){
+//         delete g_dev;
+//         g_dev = nullptr;
+//     }
 
-    errx(1,"driver start failed");
+//     errx(1,"driver start failed");
 }
 
 /**
