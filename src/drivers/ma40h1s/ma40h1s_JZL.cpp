@@ -1237,14 +1237,14 @@ void start()
 
     exit(0);
 
-// fail:
+fail:
 
-//     if(g_dev != nullptr){
-//         delete g_dev;
-//         g_dev = nullptr;
-//     }
+    if(g_dev != nullptr){
+        delete g_dev;
+        g_dev = nullptr;
+    }
 
-//     errx(1,"driver start failed");
+    errx(1,"driver start failed");
 }
 
 /**
