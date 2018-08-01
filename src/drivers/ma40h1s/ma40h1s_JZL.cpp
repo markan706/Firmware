@@ -905,7 +905,7 @@ out:
     report.timestamp = hrt_absolute_time();
     report.type = distance_sensor_s::MAV_DISTANCE_SENSOR_ULTRASOUND;
     report.orientation = err_count;
-    report.current_distance = distance_m;//distance_mid;
+    report.current_distance = 0.5; //distance_m;//distance_mid;
     report.min_distance = get_minimum_distance();
     report.max_distance = get_maximum_distance();
 	report.sonar_test[0] = distance_orginal;

@@ -2077,7 +2077,7 @@ Mavlink::task_main(int argc, char *argv[])
 	case MAVLINK_MODE_OSD:
 		configure_stream("ALTITUDE", 1.0f);
 		configure_stream("ATTITUDE", 25.0f);
-		configure_stream("DISTANCE_SENSOR", 1.0f);
+		configure_stream("DISTANCE_SENSOR", 10.0f);
 		configure_stream("ATTITUDE_TARGET", 10.0f);
 		configure_stream("ESTIMATOR_STATUS", 1.0f);
 		configure_stream("EXTENDED_SYS_STATE", 1.0f);
