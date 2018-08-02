@@ -483,8 +483,8 @@ int MA40H1S::init()
     //PX4_INFO("ADC_DMA setup");
 
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
-    //PX4_WARN("_ADC_dma start");
-
+    PX4_WARN("_ADC_dma start");
+    return ret;
     // printf("adc dma\n");
     /* arbitrarily configure all channels for 15 cycle sample time */
     //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; //  10--18  Channel 15
@@ -504,8 +504,7 @@ int MA40H1S::init()
     rCR2 |= ADC_CR2_DMA;
     rCR2 |= ADC_CR2_CONT;
     rCR2 &= ~ADC_CR2_ADON;
-	PX4_INFO("ADC setting");
-    return ret;
+	//PX4_INFO("ADC setting");
     /* power-cycle the ADC and turn it on */
     rCR2 &= ~ADC_CR2_ADON;
     usleep(10);
@@ -1141,6 +1140,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 
                 break;
 		default:
+			PX4_INFO("timer5_interrupt running");
 			break;
 	}
 
