@@ -444,7 +444,7 @@ int MA40H1S::init()
     }
     // printf("timer5 init success\n");
     enum MA40H1S_ID * pdev_id =  &_ultrasonic_id;
-    //STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, pdev_id, 0);
+    STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, pdev_id, 0);
     putreg16(0x0101,STM32_TIM5_DIER);//  putreg16(0x0101,0x40000c0c);  //STM32_TIM5_BASE:0x40000c00  STM32_GTIM_DIER_OFFSET:0x000c
     STM32_TIM_SETPERIOD(_tim5, 4);
     STM32_TIM_SETCLOCK(_tim5,1000000);
@@ -468,6 +468,7 @@ int MA40H1S::init()
         printf("adc dma init failed\n");
         return ret;
     }
+    PX4_INFO("ADC_DMA channel");
     stm32_dmasetup(
         _adc_dma, 
         STM32_ADC1_DR, //0x4001204c, // adc1 DR  
@@ -479,6 +480,7 @@ int MA40H1S::init()
         DMA_SCR_MSIZE_16BITS |\
         DMA_SCR_PBURST_SINGLE |\
         DMA_SCR_MBURST_SINGLE);//DMA_SCR_CIRC
+    PX4_INFO("ADC_DMA setup");
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     PX4_WARN("_ADC_dma start");
     // printf("adc dma\n");
