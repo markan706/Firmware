@@ -37,7 +37,7 @@ else
 	# Blacksheep telemetry
 	bst start
 
-	#adc start
+	adc start
 fi
 
 if ver hwcmp NXPHLITE_V3
