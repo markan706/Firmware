@@ -1145,7 +1145,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 rCR2 |= ADC_CR2_ADON;
                 rCR2 |= ADC_CR2_SWSTART;
                 _start_time = hrt_absolute_time();
-				PX4_INFO("timer5_interrupt running");
+				//PX4_INFO("timer5_interrupt running");
                 trig_state = 5;
 
                 break;
@@ -1173,7 +1173,8 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
     _end_time = hrt_absolute_time();
 
 	rCR2 &= ~ADC_CR2_ADON;
-	printf("_ultrasonic_id = %d\n", _ultrasonic_id);
+	//printf("_ultrasonic_id = %d\n", _ultrasonic_id);
+	printf("_ultrasonic_id\n");
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
