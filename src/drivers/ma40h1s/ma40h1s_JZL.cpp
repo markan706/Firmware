@@ -1173,7 +1173,7 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
     _end_time = hrt_absolute_time();
 
 	rCR2 &= ~ADC_CR2_ADON;
-	printf("_do_adc_dma_callback, _ultrasonic_id = %d \n", _ultrasonic_id);
+	printf("_ultrasonic_id = %d\n", _ultrasonic_id);
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
