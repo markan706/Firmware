@@ -500,7 +500,7 @@ int MA40H1S::init()
     //rSQR3 = 15;  /* will be updated with the channel each tick */
     rSQR3 = _ultrasonic_config[0].adc_ch;
     //PX4_INFO("ADC setting");
-    prinf("ADC setting");
+    printf("ADC setting\n");
     return ret;
 
     if(rSR & ADC_SR_EOC) {
