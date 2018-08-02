@@ -338,7 +338,7 @@ MA40H1S::MA40H1S():
 {
     _armed.armed = false;
     _vehicle_land_detected.landed = true;
-    single_test_mode = true; //false;
+    single_test_mode = false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
 }
@@ -1214,6 +1214,14 @@ void start()
         }
         errx(1,"driver inint failed");
         // goto fail;
+    }
+    else
+    {
+    	if(g_dev != nullptr){
+        delete g_dev;
+        g_dev = nullptr;
+        }
+        errx(1,"driver inint successfully");
     }
 
     fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
