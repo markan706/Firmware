@@ -491,7 +491,7 @@ int MA40H1S::init()
     //rSMPR2 = 0b00 000 000 000 000 010 000 000 000 000 000; //  0--9  Channel 5
     rSMPR1 = 0b00000000000000000100000000000000; //  set sample time of adc_ch14 to 010 (28T)
     rSMPR2 = 0b00000000000000000100000000000000; // set sample time of adc_ch4 to 010 (28T)
-    rCR1 = 0;ADC_CR1_RES_12BIT; //Resolution
+    rCR1 = 0;//ADC_CR1_RES_12BIT; //Resolution
     rCR2 = 0;
     PX4_INFO("ADC setting");
     return ret;
