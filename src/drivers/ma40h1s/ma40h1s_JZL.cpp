@@ -491,15 +491,18 @@ int MA40H1S::init()
     //rSMPR2 = 0b00 000 000 000 000 010 000 000 000 000 000; //  0--9  Channel 5
     rSMPR1 = 0b00000000000000000100000000000000; //  set sample time of adc_ch14 to 010 (28T)
     rSMPR2 = 0b00000000000000000100000000000000; // set sample time of adc_ch4 to 010 (28T)
-    PX4_INFO("ADC setting");
-    return ret;
-    rCR1 = 0;//ADC_CR1_RES_12BIT; //Resolution
-    rCR2 = 0;
+
+    // rCR1 = 0;//ADC_CR1_RES_12BIT; //Resolution
+    // rCR2 = 0;
 
     rSQR1 = 0;
     rSQR2 = 0;
     //rSQR3 = 15;  /* will be updated with the channel each tick */
     rSQR3 = _ultrasonic_config[0].adc_ch;
+    //PX4_INFO("ADC setting");
+    prinf("ADC setting");
+    return ret;
+
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
