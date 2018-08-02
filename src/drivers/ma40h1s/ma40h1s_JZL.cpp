@@ -1146,7 +1146,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 rCR2 |= ADC_CR2_SWSTART;
                 _start_time = hrt_absolute_time();
 				PX4_INFO("timer5_interrupt running");
-                trig_state = 5;s
+                trig_state = 5;
 
                 break;
 		default:
