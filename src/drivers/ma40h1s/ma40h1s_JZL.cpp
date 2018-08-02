@@ -512,7 +512,9 @@ int MA40H1S::init()
     rCR2 |= ADC_CR2_DDS;
     rCR2 |= ADC_CR2_DMA;
     rCR2 |= ADC_CR2_CONT;
-
+    printf("ADC setting\n");
+    return ret;
+    
     //rCR2 &= ~ADC_CR2_ADON;
 	//PX4_INFO();
     /* power-cycle the ADC and turn it on */
@@ -522,9 +524,7 @@ int MA40H1S::init()
     usleep(10);
     rCR2 |= ADC_CR2_ADON;
     usleep(10);
-    printf("ADC setting\n");
-    return ret;
-    
+
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
