@@ -338,7 +338,7 @@ MA40H1S::MA40H1S():
 {
     _armed.armed = false;
     _vehicle_land_detected.landed = true;
-    single_test_mode = false;
+    single_test_mode = true; //false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
 }
