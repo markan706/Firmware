@@ -1215,15 +1215,14 @@ void start()
         errx(1,"driver inint failed");
         // goto fail;
     }
-    else
-    {
-    	if(g_dev != nullptr){
+    if(OK == g_dev->init()){
+        if(g_dev != nullptr){
         delete g_dev;
         g_dev = nullptr;
         }
         errx(1,"driver inint successfully");
+        // goto fail;
     }
-
     fd = open(MA40H1S_DEVICE_PATH,O_RDONLY);
 
     if(fd < 0){
@@ -1236,6 +1235,7 @@ void start()
     }
 
     if(ioctl(fd,SENSORIOCSPOLLRATE, SENSOR_POLLRATE_DEFAULT) < 0){
+   	// if(ioctl(fd,RANGEFINDERSINGLEMEASURE, SENSOR_POLLRATE_DEFAULT) < 0){    	
         
         if(g_dev != nullptr){
         delete g_dev;
