@@ -497,8 +497,8 @@ int MA40H1S::init()
     rSMPR1 = 0b00000000000000000100000000000000; //  set sample time of adc_ch14 to 010 (28T)
     rSMPR2 = 0b00000000000000000100000000000000; // set sample time of adc_ch4 to 010 (28T)
 
-    // rCR1 = 0;//ADC_CR1_RES_12BIT; //Resolution
-    // rCR2 = 0;
+    rCR1 = 0;//ADC_CR1_RES_12BIT; //Resolution
+    rCR2 = 0;
 
     rSQR1 = 0;
     rSQR2 = 0;
@@ -526,8 +526,8 @@ int MA40H1S::init()
     }
     rCR2 |= ADC_CR2_DDS;
     rCR2 |= ADC_CR2_DMA;
-    printf("ADC setting\n");
-    return ret;
+    // printf("ADC setting\n");
+    // return ret;
     // rCR2 |= ADC_CR2_SWSTART;
     // printf("adc init success\n");
    	PX4_INFO("ma40h1s start!");
