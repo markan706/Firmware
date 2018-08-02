@@ -1163,7 +1163,7 @@ MA40H1S::_dma_callback(DMA_HANDLE handle, uint8_t status, void *arg)
     if (arg != nullptr) {
         MA40H1S *ps = reinterpret_cast<MA40H1S *>(arg);
         ps->_do_adc_dma_callback(status);
-       // printf("et:%llu\n",hrt_absolute_time());
+       	printf("et:%llu\n",hrt_absolute_time());
     }
 }
 
