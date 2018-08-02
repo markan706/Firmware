@@ -497,7 +497,7 @@ int MA40H1S::init()
     rSMPR1 = 0b00000000000000000100000000000000; //  set sample time of adc_ch14 to 010 (28T)
     rSMPR2 = 0b00000000000000000100000000000000; // set sample time of adc_ch4 to 010 (28T)
 
-    rCR1 = 0;//ADC_CR1_RES_12BIT; //Resolution
+    rCR1 = ADC_CR1_RES_12BIT; //Resolution
     rCR2 = 0;
 
     rSQR1 = 0;
@@ -1173,7 +1173,7 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
     _end_time = hrt_absolute_time();
 
 	rCR2 &= ~ADC_CR2_ADON;
-	//printf("_do_adc_dma_callback");
+	printf("_do_adc_dma_callback, _ultrasonic_id = %d \n", _ultrasonic_id);
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
