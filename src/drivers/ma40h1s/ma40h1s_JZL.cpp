@@ -483,14 +483,14 @@ int MA40H1S::init()
     //PX4_INFO("ADC_DMA setup");
 
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
-    PX4_WARN("_ADC_dma start");
-    return ret;
+    //PX4_WARN("_ADC_dma start");
+    //return ret;
     // printf("adc dma\n");
     /* arbitrarily configure all channels for 15 cycle sample time */
     //rSMPR1 = 0b00 000 000 000 000 010 000 000 000 000 000; //  10--18  Channel 15
     //rSMPR2 = 0b00 000 000 000 000 010 000 000 000 000 000; //  0--9  Channel 5
-    rSMPR1 = 0b00000000000000000010000000000000; //  set sample time of adc_ch14 to 010 (28T)
-    rSMPR2 = 0b00000000000000000010000000000000; // set sample time of adc_ch4 to 010 (28T)
+    rSMPR1 = 0b00000000000000000100000000000000; //  set sample time of adc_ch14 to 010 (28T)
+    rSMPR2 = 0b00000000000000000100000000000000; // set sample time of adc_ch4 to 010 (28T)
     rCR1 = ADC_CR1_RES_12BIT; //Resolution
     rCR2 = 0;
     rSQR1 = 0;
@@ -500,10 +500,12 @@ int MA40H1S::init()
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
+    PX4_INFO("ADC setting");
+    return ret;
     rCR2 |= ADC_CR2_DDS;
     rCR2 |= ADC_CR2_DMA;
     rCR2 |= ADC_CR2_CONT;
-    rCR2 &= ~ADC_CR2_ADON;
+    //rCR2 &= ~ADC_CR2_ADON;
 	//PX4_INFO("ADC setting");
     /* power-cycle the ADC and turn it on */
     rCR2 &= ~ADC_CR2_ADON;
@@ -1135,12 +1137,12 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 rCR2 |= ADC_CR2_ADON;
                 rCR2 |= ADC_CR2_SWSTART;
                 _start_time = hrt_absolute_time();
-
+				PX4_INFO("timer5_interrupt running");
                 trig_state = 5;
 
                 break;
 		default:
-			PX4_INFO("timer5_interrupt running");
+			//PX4_INFO("timer5_interrupt running");
 			break;
 	}
 
