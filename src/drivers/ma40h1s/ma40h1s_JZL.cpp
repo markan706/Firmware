@@ -508,11 +508,12 @@ int MA40H1S::init()
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
-    printf("ADC setting\n");
-    return ret;
+    
     rCR2 |= ADC_CR2_DDS;
     rCR2 |= ADC_CR2_DMA;
     rCR2 |= ADC_CR2_CONT;
+    printf("ADC setting\n");
+    return ret;
     /* power-cycle the ADC and turn it on */
     rCR2 &= ~ADC_CR2_ADON;
     usleep(10);
