@@ -352,6 +352,11 @@ MA40H1S::~MA40H1S()
         delete _reports;
     }
 
+    if (_tim5 != nullptr) {
+    	stm32_tim_deinit(_tim5);
+    	_tim5 = nullptr;
+    }
+
     if (_class_instance != -1) {
         unregister_class_devname(RANGE_FINDER_BASE_DEVICE_PATH, _class_instance);
     }   
@@ -499,9 +504,7 @@ int MA40H1S::init()
     rSQR2 = 0;
     //rSQR3 = 15;  /* will be updated with the channel each tick */
     rSQR3 = _ultrasonic_config[0].adc_ch;
-    //PX4_INFO("ADC setting");
-    printf("ADC setting\n");
-    return ret;
+    //PX4_INFO();
 
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
@@ -509,8 +512,9 @@ int MA40H1S::init()
     rCR2 |= ADC_CR2_DDS;
     rCR2 |= ADC_CR2_DMA;
     rCR2 |= ADC_CR2_CONT;
+
     //rCR2 &= ~ADC_CR2_ADON;
-	//PX4_INFO("ADC setting");
+	//PX4_INFO();
     /* power-cycle the ADC and turn it on */
     rCR2 &= ~ADC_CR2_ADON;
     usleep(10);
@@ -518,7 +522,9 @@ int MA40H1S::init()
     usleep(10);
     rCR2 |= ADC_CR2_ADON;
     usleep(10);
-
+    printf("ADC setting\n");
+    return ret;
+    
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
     }
