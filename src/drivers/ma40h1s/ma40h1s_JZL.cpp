@@ -96,7 +96,7 @@
 /*
  * Register accessors.
  */
-#define REG(_reg)   (*(volatile uint32_t *)(STM32_ADC1_BASE + _reg))
+#define REG(_reg)   (*(volatile uint32_t *)(STM32_ADC2_BASE + _reg))
 
 #define rSR         REG(STM32_ADC_SR_OFFSET)
 #define rCR1        REG(STM32_ADC_CR1_OFFSET)
@@ -467,7 +467,7 @@ int MA40H1S::init()
 	//stm32_gpiowrite(_gpio_tab.sw_b_port,true);
 	// stm32_gpiosetevent(_gpio_tab.adc_port, true, false, false, sonar_isr);
 
-    _adc_dma = stm32_dmachannel(DMAMAP_ADC1_1);
+    _adc_dma = stm32_dmachannel(DMAMAP_ADC2_1);
     if(_adc_dma == nullptr || _adc_dma == NULL){
         printf("adc dma init failed\n");
         return ret;
@@ -476,7 +476,7 @@ int MA40H1S::init()
 
     stm32_dmasetup(
         _adc_dma, 
-        STM32_ADC1_DR, // adc2 DR  
+        STM32_ADC2_DR, // adc2 DR  
         reinterpret_cast<uint32_t>(&adc_buffer),
         ADC_BUFFER_SIZE,
         DMA_SCR_DIR_P2M |\
