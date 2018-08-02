@@ -444,14 +444,15 @@ int MA40H1S::init()
     }
     // printf("timer5 init success\n");
     enum MA40H1S_ID * pdev_id =  &_ultrasonic_id;
-    STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, pdev_id, 0);
+    //STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, pdev_id, 0);
     putreg16(0x0101,STM32_TIM5_DIER);//  putreg16(0x0101,0x40000c0c);  //STM32_TIM5_BASE:0x40000c00  STM32_GTIM_DIER_OFFSET:0x000c
     STM32_TIM_SETPERIOD(_tim5, 4);
     STM32_TIM_SETCLOCK(_tim5,1000000);
     STM32_TIM_SETMODE(_tim5,STM32_TIM_MODE_UP);
     // printf("CNT:%d\n",getreg16(0x40000c24));
     // STM32_TIM_SETCOMPARE();
-     
+     PX4_INFO("timer_5 init");
+     return ret;
 
     _cycling_rate = MA40H1S_CONVERSION_INTERVAL;
 
