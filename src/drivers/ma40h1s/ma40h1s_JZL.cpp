@@ -1095,9 +1095,11 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
                if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
                     io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000); // PWM-ch5 PWM-ch6
+                    printf("enable timer, device id = %d\n", (int)(*pdev_id));
                }
                else if ((*pdev_id) == MA40H1S_ID_EXPANSION) {
                     io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11000000); // PWM-ch7 PWM-ch8
+                    printf("enable timer, device id = %d\n", (int)(*pdev_id));
                }                  
 			}
 			break;
@@ -1112,9 +1114,11 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 // stm32_gpiowrite(_dr_b_port,false);
                 if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
                     io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);
+                    printf("disable timer, device id = %d\n", (int)(*pdev_id));
                 }
                 else if ((*pdev_id) == MA40H1S_ID_EXPANSION) {
                     io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);
+                    printf("disable timer, device id = %d\n", (int)(*pdev_id));
                 } 
 				trig_state = 3;
 				ticks = 0;
