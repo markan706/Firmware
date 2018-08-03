@@ -401,7 +401,7 @@ int MA40H1S::init()
 
     _ultrasonic_id = _ultrasonic_config[0].id;
 
-    if (OK != up_pwm_servo_init(0b00110000)) {
+    if (OK != up_pwm_servo_init(!(0b00110000)) {
     	printf(" PWM CH5 and CH6 init failed\n");
     	return ret;
     }// channel mask CH5 and CH6 : 0b00110000
