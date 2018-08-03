@@ -1152,7 +1152,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 		default:
 		    if(rSR & ADC_SR_EOC) {
 		       uint32_t adc_value;
-		       adc_value = (uint32_t *)STM32_ADC2_DR;
+		       adc_value = rDR;
 		       PX4_INFO("adc_value = %d\n", adc_value);
 		       rSR &= ~ADC_SR_EOC;
 		    }
