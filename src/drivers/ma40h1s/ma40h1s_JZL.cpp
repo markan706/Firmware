@@ -487,7 +487,7 @@ int MA40H1S::init()
         DMA_SCR_MBURST_SINGLE);//DMA_SCR_CIRC
     //PX4_INFO("ADC_DMA setup");
 
-    // stm32_dmastart(_adc_dma, _dma_callback, this, false);
+    stm32_dmastart(_adc_dma, _dma_callback, this, false);
     //PX4_WARN("_ADC_dma start");
     //return ret;
     // printf("adc dma\n");
@@ -1150,13 +1150,13 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 
                 break;
 		default:
-		    if(rSR & ADC_SR_EOC) {
-		       uint32_t adc_value;
-		       adc_value = rDR;
-		       PX4_INFO("adc2_value = %d\n", adc_value);
-		       rSR &= ~ADC_SR_EOC;
-		    }
-			//PX4_INFO("timer5_interrupt running");
+		 //    if(rSR & ADC_SR_EOC) {
+		 //       uint32_t adc_value;
+		 //       adc_value = rDR;
+		 //       PX4_INFO("adc2_value = %d\n", adc_value);
+		 //       rSR &= ~ADC_SR_EOC;
+		 //    }
+			// //PX4_INFO("timer5_interrupt running");
 			break;
 	}
 
@@ -1180,7 +1180,7 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
 
 	rCR2 &= ~ADC_CR2_ADON;
 	//printf("_ultrasonic_id = %d\n", _ultrasonic_id);
-	printf("_ultrasonic_id\n");
+	printf("_ultrasonic_id = %d\n", _ultrasonic_id);
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
