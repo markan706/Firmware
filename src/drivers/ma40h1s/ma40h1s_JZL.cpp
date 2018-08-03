@@ -400,15 +400,30 @@ int MA40H1S::init()
     // _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
 
     _ultrasonic_id = _ultrasonic_config[0].id;
+    uint8_t channel_mask = 0b00110000;
+	for (unsigned channel = 0; channel_mask != 0 &&  channel < MAX_TIMER_IO_CHANNELS; channel++) {
+		if (channel_mask & (1 << channel)) {
 
-    if (OK != up_pwm_servo_init(~(0b00110000))) {
-    	printf(" PWM CH5 and CH6 init failed\n");
-    	return ret;
-    }// channel mask CH5 and CH6 : 0b00110000
+			/* First free any that were not PWM mode before */
+
+			if (-EBUSY == io_timer_is_channel_free(channel)) {
+				io_timer_free_channel(channel);
+			}
+
+			/* OneShot is set later, with the set_rate_group_update call. Init to PWM mode for now */
+
+			io_timer_channel_init(channel, IOTimerChanMode_PWMOut, NULL, NULL);
+			channel_mask &= ~(1 << channel);
+		}
+	}
+    // if (OK != up_pwm_servo_init(~(0b00110000))) {
+    // 	printf(" PWM CH5 and CH6 init failed\n");
+    // 	return ret;
+    // }// channel mask CH5 and CH6 : 0b00110000
     // io_timer_channel_init(_ultrasonic_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
     // io_timer_channel_init(_ultrasonic_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
     io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
-    io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
+    io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0);
     // io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
     // io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 12);
     // io_timer_trigger();
@@ -1101,8 +1116,8 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 // putreg16(0x0145,STM32_TIM8_DIER);// putreg16(0x0145,0x4001040c);//TIM8 STM32_TIM8_BASE:0x40010400 STM32_GTIM_DIER_OFFSET:0x000c  1 0100 0101
                if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
                     // io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b11111110); // PWM-ch5 PWM-ch6
-                    io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
-					io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 12);
+                    io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch - 1, 12);
+					io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch - 1, 12);
 					io_timer_trigger();
                     // printf("enable timer, device id = %d\n", (int)(*pdev_id));
                }
@@ -1125,8 +1140,8 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 // stm32_gpiowrite(_dr_a_port,false);
                 // stm32_gpiowrite(_dr_b_port,false);
                 if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
-            	    io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 25);
-					io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 0);
+            	    io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch-1, 25);
+					io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch-1, 0);
 					io_timer_trigger();
                     // io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11111110);  //0b00110000
                     // printf("disable timer, device id = %d\n", (int)(*pdev_id));
