@@ -405,6 +405,7 @@ int MA40H1S::init()
     io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
     io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
     io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 12);
+    io_timer_trigger();
 
     // if(_tx1_dma == nullptr || _tx1_dma == NULL){
     //     // printf("dma init failed\n");
