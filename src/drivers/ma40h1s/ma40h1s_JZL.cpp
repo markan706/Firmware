@@ -487,7 +487,7 @@ int MA40H1S::init()
         DMA_SCR_MBURST_SINGLE);//DMA_SCR_CIRC
     //PX4_INFO("ADC_DMA setup");
 
-    stm32_dmastart(_adc_dma, _dma_callback, this, false);
+    // stm32_dmastart(_adc_dma, _dma_callback, this, false);
     //PX4_WARN("_ADC_dma start");
     //return ret;
     // printf("adc dma\n");
@@ -1150,6 +1150,12 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 
                 break;
 		default:
+		    if(rSR & ADC_SR_EOC) {
+		       uint32_t adc_value;
+		       adc_value = (uint32_t *)STM32_ADC2_DR;
+		       PX4_INFO("adc_value = %d\n", adc_value);
+		       rSR &= ~ADC_SR_EOC;
+		    }
 			//PX4_INFO("timer5_interrupt running");
 			break;
 	}
