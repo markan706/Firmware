@@ -400,8 +400,13 @@ int MA40H1S::init()
     // _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
 
     _ultrasonic_id = _ultrasonic_config[0].id;
-    io_timer_channel_init(_ultrasonic_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
-    io_timer_channel_init(_ultrasonic_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
+
+    if (OK != up_pwm_servo_init(0b00110000)) {
+    	printf(" PWM CH5 and CH6 init failed\n");
+    	return ret;
+    }// channel mask CH5 and CH6 : 0b00110000
+    // io_timer_channel_init(_ultrasonic_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
+    // io_timer_channel_init(_ultrasonic_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
     io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
     io_timer_set_enable(true, IOTimerChanMode_PWMOut, 0b00110000);
     // io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
