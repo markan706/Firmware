@@ -96,7 +96,7 @@
 /*
  * Register accessors.
  */
-#define REG(_reg)   (*(volatile uint32_t *)(STM32_ADC2_BASE + _reg))
+#define REG(_reg)   (*(volatile uint32_t *)(STM32_ADC1_BASE + _reg))
 
 #define rSR         REG(STM32_ADC_SR_OFFSET)
 #define rCR1        REG(STM32_ADC_CR1_OFFSET)
@@ -1153,7 +1153,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 		    if(rSR & ADC_SR_EOC) {
 		       uint32_t adc_value;
 		       adc_value = rDR;
-		       PX4_INFO("adc_value = %d\n", adc_value);
+		       PX4_INFO("adc1_value = %d\n", adc_value);
 		       rSR &= ~ADC_SR_EOC;
 		    }
 			//PX4_INFO("timer5_interrupt running");
