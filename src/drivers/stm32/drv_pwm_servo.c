@@ -79,7 +79,8 @@ int up_pwm_servo_init(uint32_t channel_mask)
 	uint32_t current = io_timer_get_mode_channels(IOTimerChanMode_PWMOut) |
 			   io_timer_get_mode_channels(IOTimerChanMode_OneShot);
 
-	printf("up_pwm_servo_init() current = %d\n", current);		 
+	printf("up_pwm_servo_init() current = %d\n", current);	
+	printf("up_pwm_servo_init() channel_mask = %d\n", channel_mask);	 
 
 	/* First free the current set of PWMs */
 
@@ -101,6 +102,7 @@ int up_pwm_servo_init(uint32_t channel_mask)
 
 			if (-EBUSY == io_timer_is_channel_free(channel)) {
 				io_timer_free_channel(channel);
+				printf("free channel without PWM mode = %u\n", channel);
 			}
 
 			/* OneShot is set later, with the set_rate_group_update call. Init to PWM mode for now */
