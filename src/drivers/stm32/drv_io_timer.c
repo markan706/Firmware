@@ -630,7 +630,7 @@ int io_timer_set_rate(unsigned timer, unsigned rate)
 			}
 
 			timer_set_rate(timer, rate);
-			printf("setting ARR\n");
+			printf("setting ARR = %d\n", rARR(timer));
 			printf("pSC = %d\n", rPSC(timer));
 		}
 
