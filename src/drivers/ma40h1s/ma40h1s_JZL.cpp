@@ -410,11 +410,11 @@ int MA40H1S::init()
 
 			if (-EBUSY == io_timer_is_channel_free(channel)) {
 				io_timer_free_channel(channel);
-				printf("free channel without PWM mode = %u\n", channel);
+				// printf("free channel without PWM mode = %u\n", channel);
 			}
 
 			io_timer_channel_init(channel, IOTimerChanMode_PWMOut, NULL, NULL);
-			printf("init channel = %u\n", channel);
+			// printf("init channel = %u\n", channel);
 			channel_mask &= ~(1 << channel);
 		}
 	}
@@ -975,11 +975,11 @@ out:
 
 				if (-EBUSY == io_timer_is_channel_free(channel)) {
 					io_timer_free_channel(channel);
-					printf("free channel without PWM mode = %u\n", channel);
+					// printf("free channel without PWM mode = %u\n", channel);
 				}
 
 				io_timer_channel_init(channel, IOTimerChanMode_PWMOut, NULL, NULL);
-				printf("init channel = %u\n", channel);
+				// printf("init channel = %u\n", channel);
 				channel_mask &= ~(1 << channel);
 			}
 		}

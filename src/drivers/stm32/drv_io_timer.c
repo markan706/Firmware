@@ -625,6 +625,7 @@ int io_timer_set_rate(unsigned timer, unsigned rate)
 
 			if (reallocate_channel_resources(channels, IOTimerChanMode_OneShot, IOTimerChanMode_PWMOut)) {
 				io_timer_set_PWM_mode(timer);
+				printf("setting PSC\n");
 			}
 
 			timer_set_rate(timer, rate);
@@ -794,7 +795,7 @@ int io_timer_set_enable(bool state, io_timer_channel_mode_t mode, io_timer_chann
 		return -EINVAL;
 	}
 
-	printf("channel_allocations[0] = %u, channel_allocations[1] = %u, mode = %u\n", channel_allocations[0], channel_allocations[1], mode);
+	// printf("channel_allocations[0] = %u, channel_allocations[1] = %u, mode = %u\n", channel_allocations[0], channel_allocations[1], mode);
 	/* Was the request for all channels in this mode ?*/
 
 	if (masks == IO_TIMER_ALL_MODES_CHANNELS) {
@@ -802,8 +803,8 @@ int io_timer_set_enable(bool state, io_timer_channel_mode_t mode, io_timer_chann
 		/* Yes - we provide them */
 
 		masks = channel_allocations[mode];
-		printf("mode = %u\n", mode);
-		printf("io_timer_set_enable() masks = %u, channel_allocations[mode] = %u\n ", masks, channel_allocations[mode]);
+		// printf("mode = %u\n", mode);
+		// printf("io_timer_set_enable() masks = %u, channel_allocations[mode] = %u\n ", masks, channel_allocations[mode]);
 
 	} else {
 
@@ -812,8 +813,8 @@ int io_timer_set_enable(bool state, io_timer_channel_mode_t mode, io_timer_chann
 		/* Only allow the channels in that mode to be affected */
 
 		masks &= channel_allocations[mode];
-		printf("mode = %u\n", mode);
-		printf("io_timer_set_enable()  else masks = %u, channel_allocations[mode] = %u\n ", masks, channel_allocations[mode]);
+		// printf("mode = %u\n", mode);
+		// printf("io_timer_set_enable()  else masks = %u, channel_allocations[mode] = %u\n ", masks, channel_allocations[mode]);
 
 	}
 
