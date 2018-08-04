@@ -794,7 +794,7 @@ int io_timer_set_enable(bool state, io_timer_channel_mode_t mode, io_timer_chann
 		return -EINVAL;
 	}
 
-	printf("channel_allocations[0] = %u, channel_allocations[1] = %u, mode = %u", channel_allocations[0], channel_allocations[1], mode);
+	printf("channel_allocations[0] = %u, channel_allocations[1] = %u, mode = %u\n", channel_allocations[0], channel_allocations[1], mode);
 	/* Was the request for all channels in this mode ?*/
 
 	if (masks == IO_TIMER_ALL_MODES_CHANNELS) {
