@@ -907,6 +907,7 @@ int io_timer_set_ccr(unsigned channel, uint16_t value)
 			REG(channels_timer(channel), timer_io_channels[channel].ccr_offset) = value;
 		}
 	}
+	printf("setting CCR ARR = %d, ", rARR(channels_timer(channel)));
 
 	return rv;
 }
