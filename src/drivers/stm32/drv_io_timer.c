@@ -801,7 +801,8 @@ int io_timer_set_enable(bool state, io_timer_channel_mode_t mode, io_timer_chann
 		/* Yes - we provide them */
 
 		masks = channel_allocations[mode];
-		printf("io_timer_set_enable() masks = %u\n", masks);
+		//printf("io_timer_set_enable() masks = %u\n", masks);
+		PX4_INFO("io_timer_set_enable() masks = %u\n", masks);
 
 	} else {
 
@@ -810,7 +811,8 @@ int io_timer_set_enable(bool state, io_timer_channel_mode_t mode, io_timer_chann
 		/* Only allow the channels in that mode to be affected */
 
 		masks &= channel_allocations[mode];
-		printf("io_timer_set_enable() else masks = %u\n", masks);
+		//printf("io_timer_set_enable() else masks = %u\n", masks);
+		PX4_INFO("io_timer_set_enable() else masks = %u\n", masks);
 
 	}
 
