@@ -590,6 +590,7 @@ int io_timer_set_rate(unsigned timer, unsigned rate)
 	/* Get the channel bits that belong to the timer */
 
 	uint32_t channels = get_timer_channels(timer);
+	printf("channel bits = %d\n", channels);
 
 	/* Check that all channels are either in PWM or Oneshot */
 
@@ -629,6 +630,7 @@ int io_timer_set_rate(unsigned timer, unsigned rate)
 			}
 
 			timer_set_rate(timer, rate);
+			printf("setting ARR\n");
 		}
 
 		rv = OK;
