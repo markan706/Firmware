@@ -402,6 +402,7 @@ int MA40H1S::init()
     _ultrasonic_id = _ultrasonic_config[0].id;
 
     uint8_t channel_mask = 0b00110000;
+    
 	for (unsigned channel = 0; channel_mask != 0 &&  channel < MAX_TIMER_IO_CHANNELS; channel++) {
 		if (channel_mask & (1 << channel)) {
 
