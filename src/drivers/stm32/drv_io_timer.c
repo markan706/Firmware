@@ -590,7 +590,7 @@ int io_timer_set_rate(unsigned timer, unsigned rate)
 	/* Get the channel bits that belong to the timer */
 
 	uint32_t channels = get_timer_channels(timer);
-	printf("channel bits = %d\n", channels);
+	// printf("channel bits = %d\n", channels);
 
 	/* Check that all channels are either in PWM or Oneshot */
 
@@ -626,13 +626,13 @@ int io_timer_set_rate(unsigned timer, unsigned rate)
 
 			if (reallocate_channel_resources(channels, IOTimerChanMode_OneShot, IOTimerChanMode_PWMOut)) {
 				io_timer_set_PWM_mode(timer);
-				printf("setting PSC\n");
+				// printf("setting PSC\n");
 			}
 
-			printf("timer_index = %u, The ARR = %d\n", timer,rARR(timer));
+			// printf("timer_index = %u, The ARR = %d\n", timer,rARR(timer));
 			timer_set_rate(timer, rate);
-			printf("timer_index = %u, setting ARR = %d\n", timer,rARR(timer));
-			printf("pSC = %d\n", rPSC(timer));
+			// printf("timer_index = %u, setting ARR = %d\n", timer,rARR(timer));
+			// printf("pSC = %d\n", rPSC(timer));
 		}
 
 		rv = OK;

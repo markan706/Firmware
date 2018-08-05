@@ -426,8 +426,8 @@ int MA40H1S::init()
 
     // io_timer_channel_init(_ultrasonic_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
     // io_timer_channel_init(_ultrasonic_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
-	io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch-1, 12);
-	io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch-1, 12);
+	io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch-1, 0);
+	io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch-1, 0);
     io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
     
     // io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
@@ -985,9 +985,9 @@ out:
 				channel_mask &= ~(1 << channel);
 			}
 		}
-		
-		io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch-1, 12);
-		io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch-1, 12);
+
+		io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch-1, 0);
+		io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch-1, 0);
 		io_timer_set_rate(_ultrasonic_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12 
 
         rSQR3 = _ultrasonic_config[k].adc_ch;
