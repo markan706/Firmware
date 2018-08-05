@@ -722,18 +722,18 @@ int io_timer_channel_init(unsigned channel, io_timer_channel_mode_t mode,
 		rvalue |=  setbits;
 		REG(timer, ccmr_offset) = rvalue;
 
-		if (timer == 1) {
-			rCCMR1(timer) |= (6<<12); // 6: 0110 -- OC2M -- CCMR1 -- TIM4CH2
-			rCCMR1(timer) &= ~((1<<24) | (1<<12));
+		// if (timer == 1) {
+		// 	rCCMR1(timer) |= (6<<12); // 6: 0110 -- OC2M -- CCMR1 -- TIM4CH2
+		// 	rCCMR1(timer) &= ~((1<<24) | (1<<12));
 
-			rCCMR2(timer) |= (7<<4);  // 7: 0111 -- OC3M -- CCMR2 -- TIM4CH3
-			rCCMR2(timer) &= ~(1<<16);
-		}
+		// 	rCCMR2(timer) |= (7<<4);  // 7: 0111 -- OC3M -- CCMR2 -- TIM4CH3
+		// 	rCCMR2(timer) &= ~(1<<16);
+		// }
 
-		if (timer == 2) {
-			rCCMR1(timer) |= ((7<<12) |(6<<4)); // 6: 110 -- OC1M -- CCMR1 -- TIM12CH1  7: 111 -- OC2M -- TIM12CH2
-			rCCMR1(timer) &= ~(1<<4);
-		}
+		// if (timer == 2) {
+		// 	rCCMR1(timer) |= ((7<<12) |(6<<4)); // 6: 110 -- OC1M -- CCMR1 -- TIM12CH1  7: 111 -- OC2M -- TIM12CH2
+		// 	rCCMR1(timer) &= ~(1<<4);
+		// }
 
 		/*
 		 * The beauty here is that per DocID018909 Rev 8 18.3.5 Input capture mode
@@ -753,6 +753,14 @@ int io_timer_channel_init(unsigned channel, io_timer_channel_mode_t mode,
 		rvalue &= ~clearbits;
 		rvalue |=  setbits;
 		rCCER(timer) = rvalue;
+
+		if (timer == 1) {
+			rCCER(timer) |= (1<<9);  //  setting CC3P to 1 -- CCER -- TIM4CH3
+		}
+
+		if (timer == 2) {
+			rCCER(timer) |= (1<<5); // setting CC2P to 1 -- CCER -- TIM12CH2
+		}
 
 #if !defined(BOARD_HAS_CAPTURE)
 		UNUSED(dier_setbits);
@@ -895,14 +903,13 @@ int io_timer_set_ccr(unsigned channel, uint16_t value)
 	int mode = io_timer_get_channel_mode(channel);
 
 	if (rv == 0) {
-		// printf("channel %u is invalidate\n", channel);
 		if ((mode != IOTimerChanMode_PWMOut) &&
 		    (mode != IOTimerChanMode_OneShot) &&
 		    (mode != IOTimerChanMode_Trigger)) {
 
 			rv = -EIO;
 
-			printf("mode %d is not validate\n", mode);
+			// printf("mode %d is not validate\n", mode);
 
 		} else {
 
