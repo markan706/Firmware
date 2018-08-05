@@ -895,7 +895,7 @@ int io_timer_set_ccr(unsigned channel, uint16_t value)
 	int mode = io_timer_get_channel_mode(channel);
 
 	if (rv == 0) {
-		printf("channel %u is invalidate\n", channel);
+		// printf("channel %u is invalidate\n", channel);
 		if ((mode != IOTimerChanMode_PWMOut) &&
 		    (mode != IOTimerChanMode_OneShot) &&
 		    (mode != IOTimerChanMode_Trigger)) {
