@@ -3390,6 +3390,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 
 	} else if (!strcmp(verb, "mode_pwm4")) {
 		new_mode = PORT_PWM4;
+		printf("new is pwm4\n");
 
 	} else if (!strcmp(verb, "mode_pwm2")) {
 		new_mode = PORT_PWM2;

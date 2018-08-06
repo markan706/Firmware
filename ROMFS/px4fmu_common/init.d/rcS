@@ -193,7 +193,7 @@ then
 	set PWM_AUX_MAX p:PWM_AUX_MAX
 	set FAILSAFE_AUX none
 	set MK_MODE none
-	set FMU_MODE pwm
+	set FMU_MODE pwm4
 	set AUX_MODE pwm
 	set FMU_ARGS ""
 	set MAVLINK_F default
