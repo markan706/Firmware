@@ -429,7 +429,6 @@ int MA40H1S::init()
 	io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch-1, 12);
 	io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch-1, 12);
     io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
-    io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11110000);
     // io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
     // io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 12);
     // io_timer_trigger();
@@ -989,7 +988,7 @@ out:
 		io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch-1, 12);
 		io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch-1, 12);
 		io_timer_set_rate(_ultrasonic_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12 
-		io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11110000);
+		
         rSQR3 = _ultrasonic_config[k].adc_ch;
     }
 
