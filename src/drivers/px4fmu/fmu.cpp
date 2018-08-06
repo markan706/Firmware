@@ -1941,7 +1941,6 @@ PX4FMU::pwm_ioctl(file *filp, int cmd, unsigned long arg)
 	switch (cmd) {
 	case PWM_SERVO_ARM:
 		update_pwm_out_state(true);
-		io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11110000);
 		break;
 
 	case PWM_SERVO_SET_ARM_OK:
@@ -3306,6 +3305,8 @@ int PX4FMU::custom_command(int argc, char *argv[])
 	PortMode new_mode = PORT_MODE_UNSET;
 	const char *verb = argv[0];
 
+	printf("goto px4fmu::custom_command()\n");
+
 	if (!strcmp(verb, "bind")) {
 		bind_spektrum();
 		return 0;
@@ -3375,6 +3376,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 
 	} else if (!strcmp(verb, "mode_pwm")) {
 		new_mode = PORT_FULL_PWM;
+		printf("new is full pwm\n");
 
 		// mode: defines which outputs to drive (others may be used by other tasks such as camera capture)
 #if defined(BOARD_HAS_PWM)
@@ -3405,6 +3407,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 
 	} else if (!strcmp(verb, "mode_pwm6")) {
 		new_mode = PORT_PWM6;
+		printf("new is mode_pwm6\n");
 #endif
 	}
 
