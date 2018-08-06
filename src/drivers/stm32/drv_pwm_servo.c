@@ -174,7 +174,7 @@ up_pwm_servo_arm(bool armed)
 	io_timer_set_enable(armed, IOTimerChanMode_OneShot, IO_TIMER_ALL_MODES_CHANNELS);
 	io_timer_set_enable(armed, IOTimerChanMode_PWMOut, IO_TIMER_ALL_MODES_CHANNELS);
 
-	if (aremed) {
+	if (armed) {
 		io_timer_set_enable(!armed, IOTimerChanMode_PWMOut, 0b11110000);  // disable PWM5 PWM6 PWM7 PWM8
 	}
 }
