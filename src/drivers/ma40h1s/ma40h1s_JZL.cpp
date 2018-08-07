@@ -387,6 +387,10 @@ int MA40H1S::init()
         _distance_sensor_topic = orb_advertise_multi(ORB_ID(distance_sensor), &ds_report,
                                  &_orb_class_instance, ORB_PRIO_LOW);
 
+        _distance_sensor_topic = orb_advertise_multi(ORB_ID(distance_sensor), &ds_report,
+                                 &_orb_class_instance, ORB_PRIO_LOW);
+        printf("_orb_class_instance = %d\n", _orb_class_instance);
+
         if (_distance_sensor_topic == nullptr) {
             DEVICE_LOG("failed to create distance_sensor object. Did you start uOrb?");
         }
