@@ -977,12 +977,13 @@ out:
 
 	if (_ultrasonic_id == MA40H1S_ID_PRIMARY && _distance_sensor_pub[0] != nullptr) {
 		orb_publish(ORB_ID(distance_sensor), _distance_sensor_pub[0], &report);
-	
 	}
+
+	#if (NUM_OF_ULTRASONIC_DEV > 1)
 	else if (_ultrasonic_id == MA40H1S_ID_EXPANSION && _distance_sensor_pub[1] != nullptr) {
 		orb_publish(ORB_ID(distance_sensor), _distance_sensor_pub[1], &report);
-
 	}
+    #endif
 
     _reports->force(&report);
 
