@@ -179,7 +179,7 @@ private:
     float distance_orginal;
 
     int _class_instance;
-    int _orb_class_instance;
+    int _orb_class_instance[NUM_OF_ULTRASONIC_DEV];
     int _measure_ticks;
     int _cycling_rate;
 
@@ -190,7 +190,7 @@ private:
 
     bool new_value;
     
-    orb_advert_t    _distance_sensor_topic;
+    orb_advert_t    _distance_sensor_pub[NUM_OF_ULTRASONIC_DEV];
     work_s          _work;
 	
 	struct actuator_armed_s	 _armed = {};	
@@ -324,11 +324,11 @@ MA40H1S::MA40H1S():
     _min_distance(0.28f),
     _max_distance(2.0f),
     _class_instance(-1),
-    _orb_class_instance(-1),
+    // _orb_class_instance(-1),
     _measure_ticks(0),
     _cycling_rate(0),
     new_value(false),
-    _distance_sensor_topic(nullptr),
+    // _distance_sensor_pub(nullptr),
     _reports(nullptr),
     _end_time(0),
     _end_index(0),
@@ -341,6 +341,10 @@ MA40H1S::MA40H1S():
     single_test_mode = false;
     memset(&_work, 0, sizeof(_work));
     memset(&_call, 0, sizeof(_call));
+    for (uint8_t i=0; i<NUM_OF_ULTRASONIC_DEV; i++) {
+    	_orb_class_instance[i] = -1;
+    	_distance_sensor_pub[i] = nullptr;
+    }
 }
 
 MA40H1S::~MA40H1S()
@@ -384,16 +388,22 @@ int MA40H1S::init()
         /* get a publish handle on the range finder topic */
         struct distance_sensor_s ds_report = {};
 
-        _distance_sensor_topic = orb_advertise_multi(ORB_ID(distance_sensor), &ds_report,
-                                 &_orb_class_instance, ORB_PRIO_LOW);
+        for (uint8_t i=0; i<NUM_OF_ULTRASONIC_DEV; i++) {
+	        _distance_sensor_pub[i] = orb_advertise_multi(ORB_ID(distance_sensor), &ds_report,
+	                                 &_orb_class_instance[i], ORB_PRIO_LOW);
 
-        _distance_sensor_topic = orb_advertise_multi(ORB_ID(distance_sensor), &ds_report,
-                                 &_orb_class_instance, ORB_PRIO_LOW);
-        printf("_orb_class_instance = %d\n", _orb_class_instance);
-
-        if (_distance_sensor_topic == nullptr) {
-            DEVICE_LOG("failed to create distance_sensor object. Did you start uOrb?");
+            if (_distance_sensor_pub[i] == nullptr) {
+            	DEVICE_LOG("failed to create distance_sensor object. Did you start uOrb?");
+            	break;
+        	}
         }
+
+        // _distance_sensor_pub = orb_advertise_multi(ORB_ID(distance_sensor), &ds_report,
+        //                          &_orb_class_instance, ORB_PRIO_LOW);
+
+        // if (_distance_sensor_pub == nullptr) {
+        //     DEVICE_LOG("failed to create distance_sensor object. Did you start uOrb?");
+        // }
     }
     // stm32_configgpio(_dr_a_port);
     // stm32_configgpio(_dr_b_port);
@@ -961,9 +971,18 @@ out:
     report.id = (uint8_t)_ultrasonic_id;//uint32_t(distance_mid*100.0f);
 
     /* publish it, if we are the primary */
-    if (_distance_sensor_topic != nullptr) {
-        orb_publish(ORB_ID(distance_sensor), _distance_sensor_topic, &report);
-    }
+    // if (_distance_sensor_pub != nullptr) {
+    //     orb_publish(ORB_ID(distance_sensor), _distance_sensor_pub, &report);
+    // }
+
+	if (_ultrasonic_id == MA40H1S_ID_PRIMARY && _distance_sensor_pub[0] != nullptr) {
+		orb_publish(ORB_ID(distance_sensor), _distance_sensor_pub[0], &report);
+	
+	}
+	else if (_ultrasonic_id == MA40H1S_ID_EXPANSION && _distance_sensor_pub[1] != nullptr) {
+		orb_publish(ORB_ID(distance_sensor), _distance_sensor_pub[1], &report);
+
+	}
 
     _reports->force(&report);
 
