@@ -880,7 +880,6 @@ int MA40H1S::collect()
 
     if(new_value == true){
         //distance_m = ((float)_end_index*0.00229f)*0.17f*1.1f;   // 0.00042823
-        distance_m = ((float)_end_index*0.0000018f)*1.1f;   // 0.00042823
 		 //printf("%d:%d\n",_end_index,adc_buffer[_end_index]);
          //printf("dis :%.2f\n", (double)distance_m);
         new_value = false;
@@ -1235,7 +1234,7 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
     _end_time = hrt_absolute_time();
 
 	rCR2 &= ~ADC_CR2_ADON;
-	// printf("_ultrasonic_id = %d\n", _ultrasonic_id);
+	printf("deltaT = %llu\n", _end_time - _start_time);
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
     _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
