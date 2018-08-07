@@ -879,7 +879,7 @@ int MA40H1S::collect()
     // }
 
     if(new_value == true){
-        distance_m = ((float)_end_index*0.0000018f)*1.1f;   // 0.00042823
+        distance_m = ((float)_end_index*0.00183f)*0.17f*1.1f;   // 0.001833ms  340m/s / 2
 		 //printf("%d:%d\n",_end_index,adc_buffer[_end_index]);
          //printf("dis :%.2f\n", (double)distance_m);
         new_value = false;
