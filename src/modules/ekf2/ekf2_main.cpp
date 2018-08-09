@@ -1039,6 +1039,10 @@ void Ekf2::run()
 				att.pitchspeed = sensors.gyro_rad[1] - gyro_bias[1];
 				att.yawspeed = sensors.gyro_rad[2] - gyro_bias[2];
 
+				att.roll = atan2f(2*(att.q[0]*att.q[1] + att.q[2]*att.q[3]), 1 - 2*(att.q[1]*att.q[1] + att.q[2]*att.q[2]));//_ekf.get_terr1();atan2f(2*(att.q[0]*att.q[1] + att.q[2]*att.q[3]), 1 - 2*(att.q[1]*att.q[1] + att.q[2]*att.q[2]));
+				att.pitch = asinf(2*(att.q[0]*att.q[2] - att.q[3]*att.q[1]));//_ekf.get_terr2();
+				att.yaw = atan2f(2*(att.q[0]*att.q[3] + att.q[1]*att.q[2]), 1 - 2*(att.q[2]*att.q[2] + att.q[3]*att.q[3]));//alt_ave;_ekf.get_height_limit();//
+
 				// publish vehicle attitude data
 				if (_att_pub == nullptr) {
 					_att_pub = orb_advertise(ORB_ID(vehicle_attitude), &att);
