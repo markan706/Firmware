@@ -865,30 +865,37 @@ void Logger::run()
 		// the order matters: if several profiles add the same topic, the logging rate of the last one will be used
 		if (sdlog_profile & SDLogProfileMask::DEFAULT) {
 			add_default_topics();
+			printf("SDlog = default \n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::ESTIMATOR_REPLAY) {
 			add_estimator_replay_topics();
+			printf("SDlog = estimator replay\n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::THERMAL_CALIBRATION) {
 			add_thermal_calibration_topics();
+			printf("SDlog = thermal calibration\n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::SYSTEM_IDENTIFICATION) {
 			add_system_identification_topics();
+			printf("SDlog = system identification\n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::HIGH_RATE) {
 			add_high_rate_topics();
+			printf("SDlog = high rate topics\n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::DEBUG_TOPICS) {
 			add_debug_topics();
+			printf("SDlog = debug topics\n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::SENSOR_COMPARISON) {
 			add_sensor_comparison_topics();
+			printf("SDlog = sensor comparison\n");
 		}
 
 	}
