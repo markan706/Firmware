@@ -230,7 +230,7 @@ private:
     
     // uint32_t _GPIOx_BSRR_addr;
     // uint8_t _ADC_Channel; 
-    enum MA40H1S_ID _ultrasonic_id;
+    enum MA40H1S_ID _ultrasound_id;
 
     struct dev_config {
         enum MA40H1S_ID id;
@@ -239,7 +239,7 @@ private:
         uint8_t timer_index;
         uint8_t adc_ch;
     };
-    static const dev_config _ultrasonic_config[NUM_OF_ULTRASONIC_DEV];
+    static const dev_config _ultrasound_config[NUM_OF_ULTRASOUND];
     // static const GPIOConfig _gpio_tab;
     /**
     * Initialise the automatic measurement state machine and start it.
@@ -291,9 +291,9 @@ private:
 //     GPIO_DR_B
 // };
 
-const MA40H1S::dev_config MA40H1S::_ultrasonic_config[NUM_OF_ULTRASONIC_DEV] = {
+const MA40H1S::dev_config MA40H1S::_ultrasound_config[NUM_OF_ULTRASOUND] = {
     {MA40H1S_ID_PRIMARY, 6, 5, 1, 4}  // 6, 5, 1, 4
-    #if (NUM_OF_ULTRASONIC_DEV > 1)
+    #if (NUM_OF_ULTRASOUND > 1)
     ,{MA40H1S_ID_EXPANSION, 8, 7, 2, 14} // 8, 7, 2, 14
     #endif
 };
@@ -399,9 +399,9 @@ int MA40H1S::init()
     // printf("dma init start\n");
     // _tx1_dma = stm32_dmachannel(PX4FMU_SONAR_TX4_DMAMAP); 
 
-    _ultrasonic_id = _ultrasonic_config[0].id;
+    _ultrasound_id = _ultrasound_config[0].id;
 
-    uint8_t channel_mask = (1<<(_ultrasonic_config[0].pwm1_ch-1) | 1<<(_ultrasonic_config[0].pwm2_ch-1)); // 0b00110000 <==> pwm6 and pwm5
+    uint8_t channel_mask = (1<<(_ultrasound_config[0].pwm1_ch-1) | 1<<(_ultrasound_config[0].pwm2_ch-1)); // 0b00110000 <==> pwm6 and pwm5
 
 	for (unsigned channel = 0; channel_mask != 0 &&  channel < MAX_TIMER_IO_CHANNELS; channel++) {
 		if (channel_mask & (1 << channel)) {
@@ -424,13 +424,13 @@ int MA40H1S::init()
     // 	return ret;
     // }// channel mask CH5 and CH6 : 0b00110000
 
-    // io_timer_channel_init(_ultrasonic_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
-    // io_timer_channel_init(_ultrasonic_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
-	io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch-1, 12);
-	io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch-1, 12);
-    io_timer_set_rate(_ultrasonic_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
-    // io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch, 12);
-    // io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch, 12);
+    // io_timer_channel_init(_ultrasound_config[0].pwm2_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH7/CH5
+    // io_timer_channel_init(_ultrasound_config[0].pwm1_ch, IOTimerChanMode_PWMOut, NULL, NULL); // init PWM CH8/CH6
+	io_timer_set_ccr(_ultrasound_config[0].pwm1_ch-1, 12);
+	io_timer_set_ccr(_ultrasound_config[0].pwm2_ch-1, 12);
+    io_timer_set_rate(_ultrasound_config[0].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12
+    // io_timer_set_ccr(_ultrasound_config[0].pwm2_ch, 12);
+    // io_timer_set_ccr(_ultrasound_config[0].pwm1_ch, 12);
     // io_timer_trigger();
 
     // if(_tx1_dma == nullptr || _tx1_dma == NULL){
@@ -475,7 +475,7 @@ int MA40H1S::init()
         return ret;
     }
     // printf("timer5 init success\n");
-    enum MA40H1S_ID * pdev_id =  &_ultrasonic_id;
+    enum MA40H1S_ID * pdev_id =  &_ultrasound_id;
     STM32_TIM_SETISR(_tim5, MA40H1S::timer5_interrupt, pdev_id, 0);
     putreg16(0x0101,STM32_TIM5_DIER);//  putreg16(0x0101,0x40000c0c);  //STM32_TIM5_BASE:0x40000c00  STM32_GTIM_DIER_OFFSET:0x000c
     STM32_TIM_SETPERIOD(_tim5, 4);
@@ -530,7 +530,7 @@ int MA40H1S::init()
     rSQR1 = 0;
     rSQR2 = 0;
     //rSQR3 = 15;  /* will be updated with the channel each tick */
-    rSQR3 = _ultrasonic_config[0].adc_ch;
+    rSQR3 = _ultrasound_config[0].adc_ch;
     //PX4_INFO();
     if(rSR & ADC_SR_EOC) {
        rSR &= ~ADC_SR_EOC;
@@ -954,7 +954,7 @@ out:
 	report.sonar_test[0] = distance_orginal;
     report.covariance = variance;
     /* TODO: set proper ID */
-    report.id = (uint8_t)_ultrasonic_id;//uint32_t(distance_mid*100.0f);
+    report.id = (uint8_t)_ultrasound_id;//uint32_t(distance_mid*100.0f);
 
     /* publish it, if we are the primary */
     if (_distance_sensor_topic != nullptr) {
@@ -965,10 +965,10 @@ out:
 
     static uint8_t k = 0;
     if (trig_state == 5) {
-        if ((++k) >= NUM_OF_ULTRASONIC_DEV) k = 0;
-        _ultrasonic_id = _ultrasonic_config[k].id;
+        if ((++k) >= NUM_OF_ULTRASOUND) k = 0;
+        _ultrasound_id = _ultrasound_config[k].id;
 
-      	uint8_t channel_mask = (1<<(_ultrasonic_config[k].pwm1_ch-1) | 1<<(_ultrasonic_config[k].pwm2_ch-1));//  0b00110000 <==> pwm6 and pwm5
+      	uint8_t channel_mask = (1<<(_ultrasound_config[k].pwm1_ch-1) | 1<<(_ultrasound_config[k].pwm2_ch-1));//  0b00110000 <==> pwm6 and pwm5
 		for (unsigned channel = 0; channel_mask != 0 &&  channel < MAX_TIMER_IO_CHANNELS; channel++) {
 			if (channel_mask & (1 << channel)) {
 
@@ -985,11 +985,11 @@ out:
 			}
 		}
 
-		io_timer_set_ccr(_ultrasonic_config[k].pwm1_ch-1, 12);
-		io_timer_set_ccr(_ultrasonic_config[k].pwm2_ch-1, 12);
-		io_timer_set_rate(_ultrasonic_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12 
+		io_timer_set_ccr(_ultrasound_config[k].pwm1_ch-1, 12);
+		io_timer_set_ccr(_ultrasound_config[k].pwm2_ch-1, 12);
+		io_timer_set_rate(_ultrasound_config[k].timer_index, 40000); //timer_index 1: TIM4   timer_index 2: TIM12 
 		
-        rSQR3 = _ultrasonic_config[k].adc_ch;
+        rSQR3 = _ultrasound_config[k].adc_ch;
     }
 
     /* notify anyone waiting for data */
@@ -1158,8 +1158,8 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 // stm32_gpiowrite(_dr_a_port,false);
                 // stm32_gpiowrite(_dr_b_port,false);
                 if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
-    				// io_timer_set_ccr(_ultrasonic_config[0].pwm1_ch-1, 25);
-					// io_timer_set_ccr(_ultrasonic_config[0].pwm2_ch-1, 25);
+    				// io_timer_set_ccr(_ultrasound_config[0].pwm1_ch-1, 25);
+					// io_timer_set_ccr(_ultrasound_config[0].pwm2_ch-1, 25);
 					io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000); //0b00110000
                     // io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11111110);  //0b00110000
                     // printf("disable timer, device id = %d\n", (int)(*pdev_id));
