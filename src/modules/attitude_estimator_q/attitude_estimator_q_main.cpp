@@ -438,9 +438,12 @@ void AttitudeEstimatorQ::task_main()
 				.delta_q_reset = {},
 				.quat_reset_counter = 0,
 				
-				.roll = atan2f(2*(_q(0)*_q(1) + _q(2)*_q(3)), 1 - 2*(_q(1)*_q(1) + _q(2)*_q(2))),
-				.pitch = asinf(2*(_q(0)*_q(2) - _q(3)*_q(1))),
-				.yaw = atan2f(2*(_q(0)*_q(3) + _q(1)*_q(2)), 1 - 2*(_q(2)*_q(2) + _q(3)*_q(3))),
+				// .roll = atan2f(2*(_q(0)*_q(1) + _q(2)*_q(3)), 1 - 2*(_q(1)*_q(1) + _q(2)*_q(2))),
+				// .pitch = asinf(2*(_q(0)*_q(2) - _q(3)*_q(1))),
+				// .yaw = atan2f(2*(_q(0)*_q(3) + _q(1)*_q(2)), 1 - 2*(_q(2)*_q(2) + _q(3)*_q(3))),
+				.roll = 0,
+				.pitch = 0,
+				.yaw = 0,
 			};
 
 			/* the instance count is not used here */
