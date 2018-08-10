@@ -3547,6 +3547,7 @@ protected:
 			switch (dist_sensor.type) {
 			case MAV_DISTANCE_SENSOR_ULTRASOUND:
 				msg.type = MAV_DISTANCE_SENSOR_ULTRASOUND;
+				msg.id = dist_sensor.id;
 				break;
 
 			case MAV_DISTANCE_SENSOR_LASER:
