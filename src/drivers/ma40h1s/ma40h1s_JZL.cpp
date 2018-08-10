@@ -1176,7 +1176,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
 		case 2:
 			ticks++;
 			if(ticks >= 40){
-				// putreg16(0x0000,0x4001040c);
+				// putreg16(0x0000,0x4001040c);  STM32_GPIOD_BSRR
                 // stm32_gpiowrite(_gpio_tab.sw_b_port,true);
                // stm32_gpiowrite(_gpio_tab.sw_b_port,true);
                // stm32_gpiowrite(_gpio_tab.sw_a_port,true);
@@ -1186,6 +1186,8 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
     				// io_timer_set_ccr(_ultrasound_config[0].pwm1_ch-1, 25);
 					// io_timer_set_ccr(_ultrasound_config[0].pwm2_ch-1, 25);
 					io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);  // 0b00110000
+					putreg32(GPIO_BSRR_RESET(13) | GPIO_BSRR_RESET(14), STM32_GPIOD_BSRR); // PD13 and PD14
+
                     // io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11111110);  //0b00110000
                     // printf("disable timer, device id = %d\n", (int)(*pdev_id));
                 }
@@ -1193,7 +1195,7 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                     // io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11111110);// 0b11000000
                     // printf("disable timer, device id = %d\n", (int)(*pdev_id));
 					io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11000000);  // 0b11000000
-
+					putreg32(GPIO_BSRR_RESET(6) | GPIO_BSRR_RESET(9), STM32_GPIOH_BSRR); // PH6 and PH9
                 } 
 				trig_state = 3;
 				ticks = 0;
