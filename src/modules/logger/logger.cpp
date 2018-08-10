@@ -616,11 +616,11 @@ void Logger::add_default_topics()
 	add_topic("actuator_controls_0", 100);
 	add_topic("actuator_controls_1", 100);
 	add_topic("actuator_outputs", 100);
-	add_topic("airspeed", 200);
+	// add_topic("airspeed", 200);
 	add_topic("att_pos_mocap", 50);
 	add_topic("battery_status", 500);
-	add_topic("camera_capture");
-	add_topic("camera_trigger");
+	// add_topic("camera_capture");
+	// add_topic("camera_trigger");
 	add_topic("cpuload");
 	add_topic("distance_sensor", 100);
 	add_topic("ekf2_innovations", 200);
@@ -628,20 +628,20 @@ void Logger::add_default_topics()
 	add_topic("estimator_status", 200);
 	add_topic("home_position");
 	add_topic("input_rc", 200);
-	add_topic("iridiumsbd_status");
+	// add_topic("iridiumsbd_status");
 	add_topic("landing_target_pose");
 	add_topic("manual_control_setpoint", 200);
-	add_topic("mission");
-	add_topic("mission_result");
-	add_topic("optical_flow", 50);
-	add_topic("ping");
+	// add_topic("mission");
+	// add_topic("mission_result");
+	// add_topic("optical_flow", 50);
+	// add_topic("ping");
 	add_topic("position_setpoint_triplet", 200);
 	add_topic("rate_ctrl_status", 30);
 	add_topic("safety");
 	add_topic("sensor_combined", 100);
 	add_topic("sensor_preflight", 200);
 	add_topic("system_power", 500);
-	add_topic("tecs_status", 200);
+	// add_topic("tecs_status", 200);
 	add_topic("telemetry_status");
 	add_topic("vehicle_attitude", 30);
 	add_topic("vehicle_attitude_setpoint", 100);
@@ -654,11 +654,11 @@ void Logger::add_default_topics()
 	add_topic("vehicle_rates_setpoint", 30);
 	add_topic("vehicle_status", 200);
 	add_topic("vehicle_status_flags");
-	add_topic("vehicle_vision_attitude");
-	add_topic("vehicle_vision_position");
-	add_topic("vtol_vehicle_status", 200);
-	add_topic("wind_estimate", 200);
-	add_topic("timesync_status");
+	// add_topic("vehicle_vision_attitude");
+	// add_topic("vehicle_vision_position");
+	// add_topic("vtol_vehicle_status", 200);
+	// add_topic("wind_estimate", 200);
+	// add_topic("timesync_status");
 
 #ifdef CONFIG_ARCH_BOARD_SITL
 	add_topic("actuator_armed");
@@ -705,7 +705,7 @@ void Logger::add_estimator_replay_topics()
 	add_topic("ekf2_timestamps");
 
 	// current EKF2 subscriptions
-	add_topic("airspeed");
+	// add_topic("airspeed");
 	add_topic("distance_sensor");
 	add_topic("optical_flow");
 	add_topic("sensor_combined");
@@ -715,8 +715,8 @@ void Logger::add_estimator_replay_topics()
 	add_topic("vehicle_land_detected");
 	add_topic("vehicle_magnetometer");
 	add_topic("vehicle_status");
-	add_topic("vehicle_vision_attitude");
-	add_topic("vehicle_vision_position");
+	// add_topic("vehicle_vision_attitude");
+	// add_topic("vehicle_vision_position");
 }
 
 void Logger::add_thermal_calibration_topics()
@@ -740,7 +740,6 @@ void Logger::add_system_identification_topics()
 	add_topic("actuator_controls_0");
 	add_topic("actuator_controls_1");
 	add_topic("sensor_combined");
-	add_topic("distance_sensor");
 }
 
 int Logger::add_topics_from_file(const char *fname)
@@ -865,7 +864,7 @@ void Logger::run()
 		// the order matters: if several profiles add the same topic, the logging rate of the last one will be used
 		if (sdlog_profile & SDLogProfileMask::DEFAULT) {
 			add_default_topics();
-			printf("SDlog = default \n");
+			printf("SDlog = default\n");
 		}
 
 		if (sdlog_profile & SDLogProfileMask::ESTIMATOR_REPLAY) {
