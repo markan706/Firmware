@@ -1363,6 +1363,7 @@ PX4FMU::cycle()
 					printf("[@fum.cpp][cycle()] mixed_num_outputs is %u\n", mixed_num_outputs);
 					for (size_t i = 0; i < mixed_num_outputs; i++) {
 						up_pwm_servo_set(i, pwm_limited[i]);
+						printf("[@fum.cpp][cycle()] channel %u has CCR %d\n", i, pwm_limited[i]);
 					}
 				}
 
