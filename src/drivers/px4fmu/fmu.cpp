@@ -734,7 +734,7 @@ PX4FMU::set_mode(Mode mode)
 	case MODE_8PWM: // AeroCore PWMs as 8 PWM outs
 		DEVICE_DEBUG("MODE_8PWM");
 		/* default output rates */
-		_pwm_default_rate = 50;
+		_pwm_default_rate = 40000;
 		_pwm_alt_rate = 50;
 		_pwm_alt_rate_channels = 0;
 		_pwm_mask = 0xff;
