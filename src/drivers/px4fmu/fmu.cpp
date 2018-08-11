@@ -1360,10 +1360,10 @@ PX4FMU::cycle()
 
 				/* output to the servos */
 				if (_pwm_initialized) {
-					printf("[@fum.cpp][cycle()] mixed_num_outputs is %u\n", mixed_num_outputs);
-					for (size_t i = 0; i < mixed_num_outputs; i++) {
+					// printf("[@fum.cpp][cycle()] mixed_num_outputs is %u\n", mixed_num_outputs); // mixed_num_outputs = 6
+					// for (size_t i = 0; i < mixed_num_outputs; i++) {
+					for (size_t i = 0; i < 4; i++) {
 						up_pwm_servo_set(i, pwm_limited[i]);
-						printf("[@fum.cpp][cycle()] channel %u has CCR %d\n", i, pwm_limited[i]);
 					}
 				}
 
