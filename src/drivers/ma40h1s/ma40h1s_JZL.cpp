@@ -1185,8 +1185,8 @@ int MA40H1S::timer5_interrupt(int irq, void *context, void *arg)
                 if ((*pdev_id) == MA40H1S_ID_PRIMARY) {
     				// io_timer_set_ccr(_ultrasound_config[0].pwm1_ch-1, 25);
 					// io_timer_set_ccr(_ultrasound_config[0].pwm2_ch-1, 25);
-					io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);  // 0b00110000
 					putreg32(GPIO_BSRR_RESET(13) | GPIO_BSRR_RESET(14), STM32_GPIOD_BSRR); // PD13 and PD14
+					io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b00110000);  // 0b00110000
 
                     // io_timer_set_enable(false, IOTimerChanMode_PWMOut, 0b11111110);  //0b00110000
                     // printf("disable timer, device id = %d\n", (int)(*pdev_id));
