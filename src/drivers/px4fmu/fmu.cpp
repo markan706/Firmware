@@ -359,7 +359,7 @@ work_s	PX4FMU::_work = {};
 PX4FMU::PX4FMU(bool run_as_task) :
 	CDev("fmu", PX4FMU_DEVICE_PATH),
 	_mode(MODE_NONE),
-	_pwm_default_rate(50),
+	_pwm_default_rate(40000),
 	_pwm_alt_rate(50),
 	_pwm_alt_rate_channels(0),
 	_current_update_rate(0),
@@ -643,7 +643,7 @@ PX4FMU::set_mode(Mode mode)
 	 * are presented on the output pins.
 	 */
 
-	printf("[fmu.cpp][set_mode()] mode = %u\n", mode);
+	printf("[@fmu.cpp][set_mode()] mode = %u\n", mode);
 	switch (mode) {
 	case MODE_1PWM:
 		/* default output rates */
@@ -858,14 +858,14 @@ PX4FMU::set_pwm_rate(uint32_t rate_map, unsigned default_rate, unsigned alt_rate
 						PX4_WARN("rate group set alt failed");
 						return -EINVAL;
 					}
-					printf("[fum.cpp][set_pwm_rate()] group is %u for alternate channels\n", group);
+					printf("[@fum.cpp][set_pwm_rate()] group is %u for alternate channels\n", group);
 
 				} else {
 					if (up_pwm_servo_set_rate_group_update(group, default_rate) != OK) {
 						PX4_WARN("rate group set default failed");
 						return -EINVAL;
 					}
-					printf("[fum.cpp][set_pwm_rate()] group is %u for default channels\n", group);
+					printf("[@fum.cpp][set_pwm_rate()] group is %u for default channels\n", group);
 				}
 			}
 		}
@@ -1169,10 +1169,10 @@ void
 PX4FMU::update_pwm_out_state(bool on)
 {
 	if (on && !_pwm_initialized && _pwm_mask != 0) {
-		printf("[fmu.cpp][update_pwm_out_state()]_pwm_mask = %d\n", _pwm_mask);
-		printf("[fmu.cpp][update_pwm_out_state()]_pwm_alt_rate_channels = %d\n", _pwm_alt_rate_channels);
-		printf("[fmu.cpp][update_pwm_out_state()]_pwm_default_rate = %u\n", _pwm_default_rate);
-		printf("[fmu.cpp][update_pwm_out_state()]_pwm_alt_rate = %u\n", _pwm_alt_rate);
+		printf("[@fmu.cpp][update_pwm_out_state()]_pwm_mask = %d\n", _pwm_mask);
+		printf("[@fmu.cpp][update_pwm_out_state()]_pwm_alt_rate_channels = %d\n", _pwm_alt_rate_channels);
+		printf("[@fmu.cpp][update_pwm_out_state()]_pwm_default_rate = %u\n", _pwm_default_rate);
+		printf("[@fmu.cpp][update_pwm_out_state()]_pwm_alt_rate = %u\n", _pwm_alt_rate);
 		up_pwm_servo_init(_pwm_mask);
 		set_pwm_rate(_pwm_alt_rate_channels, _pwm_default_rate, _pwm_alt_rate);
 		_pwm_initialized = true;
@@ -3313,7 +3313,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 	PortMode new_mode = PORT_MODE_UNSET;
 	const char *verb = argv[0];
 
-	printf("[fmu.cpp][custom_command()]\n");
+	printf("[@fmu.cpp][custom_command()]\n");
 
 	if (!strcmp(verb, "bind")) {
 		bind_spektrum();
@@ -3384,7 +3384,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 
 	} else if (!strcmp(verb, "mode_pwm")) {
 		new_mode = PORT_FULL_PWM;
-		printf("[fmu.cpp][custom_command()]new mode is full pwm\n");
+		printf("[@fmu.cpp][custom_command()]new mode is full pwm\n");
 
 		// mode: defines which outputs to drive (others may be used by other tasks such as camera capture)
 #if defined(BOARD_HAS_PWM)
@@ -3398,7 +3398,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 
 	} else if (!strcmp(verb, "mode_pwm4")) {
 		new_mode = PORT_PWM4;
-		printf("[fmu.cpp][custom_command()]new mode is pwm4\n");
+		printf("[@fmu.cpp][custom_command()]new mode is pwm4\n");
 
 	} else if (!strcmp(verb, "mode_pwm2")) {
 		new_mode = PORT_PWM2;
@@ -3416,7 +3416,7 @@ int PX4FMU::custom_command(int argc, char *argv[])
 
 	} else if (!strcmp(verb, "mode_pwm6")) {
 		new_mode = PORT_PWM6;
-		printf("[fmu.cpp][custom_command()]new mode is mode_pwm6\n");
+		printf("[@fmu.cpp][custom_command()]new mode is mode_pwm6\n");
 #endif
 	}
 

@@ -138,7 +138,7 @@ int up_pwm_servo_set_rate_group_update(unsigned group, unsigned rate)
 			return -ERANGE;
 		}
 
-		if (rate > 10000) {
+		if (group == 0 && rate > 10000) {
 			return -ERANGE;
 		}
 	}
