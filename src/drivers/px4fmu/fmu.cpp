@@ -1360,6 +1360,7 @@ PX4FMU::cycle()
 
 				/* output to the servos */
 				if (_pwm_initialized) {
+					printf("[@fum.cpp][cycle()] mixed_num_outputs is %u\n", mixed_num_outputs);
 					for (size_t i = 0; i < mixed_num_outputs; i++) {
 						up_pwm_servo_set(i, pwm_limited[i]);
 					}
