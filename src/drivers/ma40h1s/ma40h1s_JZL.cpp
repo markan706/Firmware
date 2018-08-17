@@ -518,7 +518,7 @@ int MA40H1S::init()
 
     stm32_dmasetup(
         _adc_dma, 
-        STM32_ADC2_DR, // adc2 DR  
+        STM32_ADC1_DR, // adc2 DR  
         reinterpret_cast<uint32_t>(&adc_buffer),
         ADC_BUFFER_SIZE,
         DMA_SCR_DIR_P2M |\
