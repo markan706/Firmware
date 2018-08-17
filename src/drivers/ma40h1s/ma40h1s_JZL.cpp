@@ -852,10 +852,7 @@ int MA40H1S::collect()
 	float sum = 0.0f;
 	float sum_2 = 0.0f;
 	float variance = 0.0f;
-    // for (int i = 0; i < ADC_BUFFER_SIZE; ++i)
-    // {
-    //     printf("%d:%d\n",i,adc_buffer[i]);
-    // }
+
     distance_orginal = 0.0f;
 	
 	int  _vehicle_land_detected_sub = orb_subscribe(ORB_ID(vehicle_land_detected));
@@ -1263,6 +1260,12 @@ void MA40H1S::_do_adc_dma_callback(unsigned status)
 	rCR2 &= ~ADC_CR2_ADON;
 	// printf("_ultrasound_id = %d\n", _ultrasound_id);
     stm32_dmastart(_adc_dma, _dma_callback, this, false);
+
+    for (int i = 0; i < ADC_BUFFER_SIZE; ++i)
+    {
+        printf("%d:%d\n",i,adc_buffer[i]);
+    }
+
     _end_index = sonar_decoder_c((int16_t *)adc_buffer,(uint16_t)ADC_BUFFER_SIZE);
     if(_end_index != 1){
         new_value = true;
