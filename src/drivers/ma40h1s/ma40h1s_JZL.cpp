@@ -509,7 +509,7 @@ int MA40H1S::init()
 	//stm32_gpiowrite(_gpio_tab.sw_b_port,true);
 	// stm32_gpiosetevent(_gpio_tab.adc_port, true, false, false, sonar_isr);
 
-    _adc_dma = stm32_dmachannel(DMAMAP_ADC2_1);
+    _adc_dma = stm32_dmachannel(DMAMAP_ADC1_1);
     if(_adc_dma == nullptr || _adc_dma == NULL){
         printf("adc dma init failed\n");
         return ret;
