@@ -96,7 +96,7 @@
 /*
  * Register accessors.
  */
-#define REG(_reg)   (*(volatile uint32_t *)(STM32_ADC2_BASE + _reg))
+#define REG(_reg)   (*(volatile uint32_t *)(STM32_ADC1_BASE + _reg))
 
 #define rSR         REG(STM32_ADC_SR_OFFSET)
 #define rCR1        REG(STM32_ADC_CR1_OFFSET)
